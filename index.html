@@ -69,6 +69,13 @@ select{height:34px;border-radius:10px;border:1px solid var(--line);background:rg
 button.rr:hover{background:rgba(255,255,255,.1)}
 .rr .lv{width:10px;height:10px;border-radius:50%;margin-top:6px;background:#6e6e76}.rr .lv.ok{background:var(--want)}.rr .lv.watch{background:var(--hesitant)}.rr .lv.flag{background:var(--critical)}
 .rr b{display:block;font-weight:600;font-size:14.5px}.rr span{font-size:13.5px;color:var(--mute)}
+.glow{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(520px 380px at 22% 34%,rgba(150,120,255,.20),transparent 70%),radial-gradient(620px 420px at 78% 62%,rgba(190,150,255,.14),transparent 70%)}
+.card.key{background:linear-gradient(140deg,rgba(210,196,255,.42),rgba(170,150,255,.26) 55%,rgba(255,255,255,.14));border-color:rgba(214,200,255,.45);backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 22px 70px rgba(124,92,255,.22)}
+.card.key .meta,.card.key .note,.card.key .tile .d,.card.key .tile .k,.card.key .toggle,.card.key .ai,.card.key .rr span,.card.key .lgd{color:#ddd6f3}
+.card.key .tile,.card.key .rr{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.18)}
+.card.key .verdict{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.24)}.card.key .verdict span{color:#e4dcff}
+.card.key .ghost{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.26)}
+.card.key .nb{font-size:16px}.card.key h2{font-size:18px}
 .note{font-size:13px;color:var(--mute);margin-top:12px}
 .ai{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--mute);margin-top:12px}.ai b{flex:none;font:600 10.5px var(--mono);letter-spacing:.06em;color:#000;background:#d1d1d6;border-radius:5px;padding:2px 6px;margin-top:1px}
 .cm p.zh,.q p.zh{color:#c7c7cc;font-size:14.5px;border-left:2px solid rgba(255,255,255,.2);padding-left:10px}
@@ -138,7 +145,7 @@ button.tile:hover{background:rgba(255,255,255,.11);transform:translateY(-1px)}
 .chip{border:1px solid var(--line);background:rgba(255,255,255,.06);border-radius:999px;padding:5px 13px;font-size:13px}
 .chip:hover{background:rgba(255,255,255,.14)}
 .chip.on{background:#f5f5f7;border-color:#f5f5f7;color:#000}
-.health{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.health{display:grid;grid-template-columns:repeat(2,1fr);gap:16px 12px}
 .health b{display:block;font:600 24px var(--sans);letter-spacing:-.02em}.health span{font-size:12.5px;color:var(--mute)}
 .cm{padding:13px 0;border-bottom:1px solid var(--line)}
 .cm:last-of-type{border-bottom:0}
@@ -155,7 +162,7 @@ footer a{color:var(--ink)}
 </style>
 </head>
 <body>
-<canvas id="code" aria-hidden="true"></canvas><div class="veil"></div>
+<canvas id="code" aria-hidden="true"></canvas><div class="veil"></div><div class="glow"></div>
 <header><div class="wrap top">
   <div class="brand"><i></i>Creator Signal</div>
   <nav>
@@ -205,8 +212,8 @@ en:{
   h1:'What did the audience actually say about the game?',
   sub:'Views tell you how many people watched a sponsored video. The comments tell you whether they want to play, what is stopping them, and whether they came from a competing game. Every number here links back to the comments behind it.',
   by:'Built by', analyse:'Analyse', ph:'Paste a YouTube video link, or a channel link to check the channel', compareTitle:'Compare sponsored videos', methodTitle:'Method and limits',
-  heads:['Creator','Views','Views / subs','Like rate','About the game','Want to play','Hesitant','Top barrier','Competitor players','Ad pushback','Fee (USD)','CPM'],
-  headTips:['','Total views of the video','Views divided by channel subscribers. Above 1x means the video travelled beyond the subscriber base.','Likes divided by views','Share of analysed comments that talk about the game','Share of game comments that want to play or praise the game','Share of game comments that are interested but name a condition or worry','The reason for not playing that comes up most often','Share of commenters who reveal they play a competing game','Share of comments that dislike the sponsorship','Type what you paid or were quoted. Stays in this browser only.','Fee divided by views, times 1,000'],
+  heads:['Creator','Views','vs channel','Like rate','About the game','Want to play','Hesitant','Top barrier','Competitor players','Ad pushback','Fee (USD)','CPM'],
+  headTips:['','Total views of the video','Views of this video divided by the median views of the channel\'s recent long videos. Below 1x means it did worse than the creator\'s usual video.','Likes divided by views','Share of analysed comments that talk about the game','Share of game comments that want to play or praise the game','Share of game comments that are interested but name a condition or worry','The reason for not playing that comes up most often','Share of commenters who reveal they play a competing game','Share of comments that dislike the sponsorship','Type what you paid or were quoted. Stays in this browser only.','Fee divided by views, times 1,000'],
   pwPh:'Access password', pwSave:'Continue', mPw:'Enter the access password to analyse a new video.',
   pFetch:'Fetching the video and its comments…', pRead:(d,t)=>`Reading comments: ${d} of ${t} batches done. This takes about 20 seconds.`,
   pPartial:n=>`Done, but ${n} comments could not be read and are left out.`,
@@ -241,6 +248,7 @@ en:{
   chLg:['Regular video','Declared sponsored','High views, low like rate'],
   chSp:'Declared sponsored videos', chOut:'Videos worth a closer look', chH:['Video','Date','Views','vs median','Like rate',''], chAn:'Analyse comments',
   chAsk:'What to ask the creator for before signing', chAskL:['Audience geography for the last 90 days. Bought traffic usually comes from places the creator does not speak to.','Traffic sources for recent videos. A large share from external or direct sources on a video with weak engagement needs an explanation.','Audience retention on two recent videos. Purchased views tend to leave within seconds.','Unique viewers and returning viewers, which are more telling than the public subscriber count.'],
+  vch:'of the channel\'s usual views', vchOld:'This video is older than the channel\'s last 50 uploads, so it is compared with the channel as it is today.', v7:x=>`It reached ${x} times the channel\'s usual views.`,
   qTitle:'Quotes worth using', qNote:'The most liked comment of each kind.',
   port:(n,views,med,cpm)=>`<span><b>${n}</b> videos</span><span><b>${views}</b> total views</span><span>median want to play <b>${med}</b></span>` + (cpm ? `<span>blended CPM <b>$${cpm}</b></span>` : ''),
   roadTitle:'On the roadmap', road:['TikTok, Twitch and Instagram through the reserved platform adapter, once the data source has had a legal review.','Creator vetting from the open web: recent news and forum threads about a creator, listed with their sources and no verdict.','One-click translation of comments.','A one page PDF report per creator.'],
@@ -305,8 +313,8 @@ zh:{
   h1:'观众到底怎么评价这款游戏？',
   sub:'播放量只说明有多少人看了赞助视频。评论区能告诉你他们想不想玩、被什么拦住、是不是从竞品过来的。页面上每个数字都能点开，看到背后的评论原文。',
   by:'作者', analyse:'分析', ph:'粘贴 YouTube 视频链接分析评论，或粘贴频道链接做频道体检', compareTitle:'赞助视频对比', methodTitle:'方法与局限',
-  heads:['创作者','播放','播放/粉丝','点赞率','游戏相关度','想玩','犹豫','首要门槛','竞品玩家','广告反感','报价 (USD)','CPM'],
-  headTips:['','视频总播放量','播放量除以频道粉丝数。大于 1x 说明视频传到了粉丝之外。','点赞数除以播放量','已分析评论里聊到游戏的占比','游戏相关评论里，想玩或明确夸游戏的占比','游戏相关评论里，感兴趣但提出条件或顾虑的占比','被提到最多的不玩原因','透露自己在玩竞品的评论者占比','反感赞助的评论占比','填入你支付或收到的报价，只保存在这个浏览器里。','报价除以播放量，再乘以 1000'],
+  heads:['创作者','播放','相对频道','点赞率','游戏相关度','想玩','犹豫','首要门槛','竞品玩家','广告反感','报价 (USD)','CPM'],
+  headTips:['','视频总播放量','这条视频的播放量除以该频道近期长视频的播放中位数。小于 1x 说明它不如这位创作者平时的视频。','点赞数除以播放量','已分析评论里聊到游戏的占比','游戏相关评论里，想玩或明确夸游戏的占比','游戏相关评论里，感兴趣但提出条件或顾虑的占比','被提到最多的不玩原因','透露自己在玩竞品的评论者占比','反感赞助的评论占比','填入你支付或收到的报价，只保存在这个浏览器里。','报价除以播放量，再乘以 1000'],
   pwPh:'访问密码', pwSave:'继续', mPw:'分析新视频需要先输入访问密码。',
   pFetch:'正在获取视频和评论…', pRead:(d,t)=>`正在阅读评论：已完成 ${d}/${t} 批，整个过程大约 20 秒。`,
   pPartial:n=>`已完成，但有 ${n} 条评论没读出来，未计入结果。`,
@@ -341,6 +349,7 @@ zh:{
   chLg:['普通视频','已声明赞助','播放高、点赞率低'],
   chSp:'已声明赞助的视频', chOut:'值得细看的视频', chH:['视频','日期','播放','相对中位数','点赞率',''], chAn:'分析评论',
   chAsk:'签约前建议向创作者要的数据', chAskL:['近 90 天的观众地区分布。买来的流量通常来自创作者并不面向的地区。','近期视频的流量来源。互动很弱的视频如果外部或直接来源占比很高，需要对方解释。','两条近期视频的观众留存曲线。买来的播放往往几秒内就离开。','独立观众数和回访观众数，它们比公开的粉丝数更说明问题。'],
+  vch:'相当于频道平时播放量的倍数', vchOld:'这条视频不在频道最近 50 条上传之内，这里是和频道现在的水平比较。', v7:x=>`播放量是该频道平时水平的 ${x} 倍。`,
   qTitle:'值得引用的评论', qNote:'每一类里点赞最多的那条。',
   port:(n,views,med,cpm)=>`<span><b>${n}</b> 条视频</span><span>总播放 <b>${views}</b></span><span>想玩占比中位数 <b>${med}</b></span>` + (cpm ? `<span>综合 CPM <b>$${cpm}</b></span>` : ''),
   roadTitle:'后续计划', road:['通过预留的平台接口接入 TikTok、Twitch 和 Instagram，前提是数据来源通过法务确认。','全网创作者背调：列出关于创作者的近期新闻和论坛讨论，只给来源，不下结论。','评论一键翻译。','每位创作者导出一页 PDF 报告。'],
@@ -412,8 +421,23 @@ const S = {vid:D.videos[0] && D.videos[0].id, weighted:false, filter:null, q:'',
 try { S.fees = JSON.parse(localStorage.getItem('cs-fees') || '{}') || {}; } catch (e) {}
 function fee(v) { const x = parseFloat(S.fees[v.id]); return isNaN(x) ? NaN : x; }
 function cpm(v) { const f = fee(v); return v.views && !isNaN(f) ? f / v.views * 1000 : NaN; }
-const COLS = [(v, m) => v.channel.toLowerCase(), v => v.views, (v, m) => m.viewsPerSub, (v, m) => m.likeRate, (v, m) => m.relevance, (v, m) => m.intent, (v, m) => m.hesitant,
+const COLS = [(v, m) => v.channel.toLowerCase(), v => v.views, v => vsCh(v), (v, m) => m.likeRate, (v, m) => m.relevance, (v, m) => m.intent, (v, m) => m.hesitant,
   (v, m) => m.bars[0] ? m.bars[0].n : 0, (v, m) => m.competitor, (v, m) => m.adDislike, v => fee(v), v => cpm(v)];
+const CHM = {}; try { Object.assign(CHM, JSON.parse(sessionStorage.getItem('cs-chm') || '{}')); } catch (e) {}
+function vsCh(v) { const c = CHM[v.id]; return c && c.med && v.views ? v.views / c.med : NaN; }
+async function loadMedians() {
+  if (!API || S.chmBusy) return; S.chmBusy = true;
+  for (const v of D.videos.slice()) {
+    if (CHM[v.id] !== undefined) continue;
+    try {
+      const r = await fetch(API + '/api/channel', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({url: 'https://www.youtube.com/watch?v=' + v.id})}), ch = await r.json();
+      if (r.ok && Array.isArray(ch.videos)) { const st = chStats(ch); CHM[v.id] = {med: st.med, n: st.L.length, inS: ch.videos.some(x => x.id === v.id)}; } else CHM[v.id] = null;
+    } catch (e) { CHM[v.id] = null; }
+    try { sessionStorage.setItem('cs-chm', JSON.stringify(CHM)); } catch (e) {}
+    renderCompare(); if (v.id === S.vid && document.activeElement.id !== 'q') renderDetail();
+  }
+  S.chmBusy = false;
+}
 function sorted() {
   const rows = D.videos.map(v => ({v, m: metrics(v, S.weighted)}));
   if (S.sort.k != null) {
@@ -435,6 +459,7 @@ function verdict(v, m) {
   if (m.competitor >= .15 && comp) s.push(T.v3(pct(m.competitor), comp[0]));
   if (top && top.n >= 3) s.push(T.v4(T.b[top.key], top.n));
   if (m.nDislike >= 3) s.push(T.v5(m.nDislike));
+  if (!isNaN(vsCh(v))) s.push(T.v7(vsCh(v).toFixed(2)));
   if (m.nRel < 30) s.push(T.v6(m.nRel));
   return s.join(' ');
 }
@@ -568,7 +593,7 @@ function chTable(title, rows) {
 function renderChannel() {
   const el = document.getElementById('channel'), ch = S.ch; if (!ch) { el.innerHTML = ''; return; }
   const st = chStats(ch), n = st.L.length;
-  el.innerHTML = `<div class="card"><div class="hrow"><h2>${T.chTitle}</h2><button class="ghost" id="chclose">${T.chClose}</button></div>
+  el.innerHTML = `<div class="card key"><div class="hrow"><h2>${T.chTitle}</h2><button class="ghost" id="chclose">${T.chClose}</button></div>
     <div class="vhead"><div><h3>${esc(ch.title)}</h3><div class="meta">${esc(T.chMeta(ch))}</div></div></div>
     <div class="tiles">
       <div class="tile"><div class="k">${T.chK[0]}</div><div class="v">${ch.subs == null ? 'n/a' : big(ch.subs)}</div><div class="d">${ch.subs == null ? T.chD.hidden : ''}</div></div>
@@ -599,7 +624,7 @@ function download(name, rows) {
   document.body.appendChild(a); a.click(); a.remove();
 }
 function exportTable() {
-  download('creator-signal-summary.csv', [T.heads.concat(['URL'])].concat(sorted().map(({v, m}) => [v.channel, v.views, isNaN(m.viewsPerSub) ? '' : m.viewsPerSub.toFixed(2), pct(m.likeRate, 2),
+  download('creator-signal-summary.csv', [T.heads.concat(['URL'])].concat(sorted().map(({v, m}) => [v.channel, v.views, isNaN(vsCh(v)) ? '' : vsCh(v).toFixed(2), pct(m.likeRate, 2),
     pct(m.relevance), pct(m.intent), pct(m.hesitant), m.bars[0] ? T.b[m.bars[0].key] : T.none, pct(m.competitor), pct(m.adDislike), S.fees[v.id] || '', isNaN(cpm(v)) ? '' : cpm(v).toFixed(2), 'https://www.youtube.com/watch?v=' + v.id])));
 }
 function exportComments() {
@@ -681,7 +706,7 @@ function renderCompare() {
     const nf = risk(v, m).filter(x => x.lv === 'flag').length;
     return `<tr data-vid="${v.id}" class="${v.id === S.vid ? 'on' : ''}">
       <td><b>${esc(v.channel)}</b>${nf ? `<span class="badge warn" title="${T.rBadge(nf)}">${nf}</span>` : ''}${v.live ? `<button class="rm" data-rm="${v.id}" title="${T.remove}">×</button>` : ''}<div class="t">${esc(v.title)}</div></td>
-      <td>${big(v.views)}</td><td>${isNaN(m.viewsPerSub) ? 'n/a' : m.viewsPerSub.toFixed(2) + 'x'}</td><td>${pct(m.likeRate, 1)}</td>
+      <td>${big(v.views)}</td><td>${isNaN(vsCh(v)) ? (CHM[v.id] === undefined && API ? '…' : 'n/a') : vsCh(v).toFixed(2) + 'x'}</td><td>${pct(m.likeRate, 1)}</td>
       <td>${pct(m.relevance)}</td><td>${pct(m.intent)}</td><td>${pct(m.hesitant)}</td>
       <td>${m.bars[0] ? esc(T.b[m.bars[0].key]) : T.none}</td><td>${pct(m.competitor)}</td><td>${pct(m.adDislike)}</td>
       <td><input type="text" class="fee" data-fee="${v.id}" value="${esc(S.fees[v.id] || '')}" placeholder="${T.feePh}" inputmode="decimal"></td><td>${isNaN(cpm(v)) ? 'n/a' : '$' + cpm(v).toFixed(2)}</td></tr>`;
@@ -705,7 +730,7 @@ function renderDetail() {
   const v = D.videos.find(x => x.id === S.vid), el = document.getElementById('detail');
   if (!v) { el.innerHTML = ''; return; }
   const m = metrics(v, S.weighted), top = m.bars[0];
-  let h = `<div class="card"><div class="vhead"><div>
+  let h = `<div class="card key"><div class="vhead"><div>
       <h3>${esc(v.channel)}${v.paid ? `<span class="badge">${T.paid}</span>` : ''}${m.nRel < 30 ? `<span class="badge warn">${T.small}</span>` : ''}</h3>
       <div class="meta"><a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">${esc(v.title)}</a></div>
       <div class="meta">${T.meta(v, m)}</div>
@@ -722,7 +747,7 @@ function renderDetail() {
       ${tile(T.kAd, pct(m.adDislike), T.adD(m.nDislike, m.nAd), 'ad:any', false, T.tip.ad)}
     </div></div>`;
   const nb = brief(v, m);
-  if (nb.length) h += `<div class="card"><h2>${T.nextTitle}</h2><ul class="nb">${nb.map(x => '<li>' + esc(x) + '</li>').join('')}</ul><div class="note">${T.nextNote}</div></div>`;
+  if (nb.length) h += `<div class="card key"><h2>${T.nextTitle}</h2><ul class="nb">${nb.map(x => '<li>' + esc(x) + '</li>').join('')}</ul><div class="note">${T.nextNote}</div></div>`;
   const qs = ['want', 'hesitant', 'critical'].map(a => v.comments.filter(c => c.a === a && c.t.length >= 25).sort((x, y) => y.k - x.k)[0]).filter(Boolean);
   if (qs.length) h += `<div class="card"><h2>${T.qTitle}</h2><div class="qs">` + qs.map(c => `<div class="q"><p>${highlight(c.t, c.ev)}</p>${lang === 'zh' && c._zh ? `<p class="zh">${esc(c._zh)}</p>` : ''}<div class="tags"><span class="tag ${c.a}">${T.a[c.a]}</span><span>${c.k.toLocaleString()} ${T.likes}</span><button class="cp" data-cp="${esc(c.t)}">${T.copyQuote}</button></div></div>`).join('') + `</div><div class="note">${T.qNote}</div></div>`;
   h += `<div class="grid"><div class="card"><h2>${T.stance}</h2><div class="stack">` +
@@ -748,7 +773,8 @@ function renderDetail() {
   h += `<div class="card"><h2>${T.health}</h2><div class="health">
       <div><b>${isNaN(m.viewsPerSub) ? 'n/a' : m.viewsPerSub.toFixed(2) + 'x'}</b><span>${T.vps}</span></div>
       <div><b>${pct(m.likeRate, 2)}</b><span>${T.lpv}</span></div>
-      <div><b>${pct(m.commentRate, 3)}</b><span>${T.cpv}</span></div></div>
+      <div><b>${pct(m.commentRate, 3)}</b><span>${T.cpv}</span></div>
+      <div><b>${isNaN(vsCh(v)) ? 'n/a' : vsCh(v).toFixed(2) + 'x'}</b><span>${T.vch}</span></div></div>${CHM[v.id] && !CHM[v.id].inS ? `<div class="note">${T.vchOld}</div>` : ''}
       </div></div>`;
   h += `<div class="card"><h2>${T.rTitle}</h2><div class="rk">` +
     risk(v, m).map(x => { const inner = `<i class="lv ${x.lv}"></i><div><b>${x.label}</b><span>${x.value}</span></div>`; return x.f ? `<button class="rr" data-f="${x.f}">${inner}</button>` : `<div class="rr">${inner}</div>`; }).join('') +
@@ -770,7 +796,7 @@ function renderDetail() {
   el.innerHTML = h;
 }
 function render(keepFocus) {
-  renderStatic(); renderCompare(); renderDetail(); renderBatch(); renderChannel();
+  renderStatic(); renderCompare(); renderDetail(); renderBatch(); renderChannel(); loadMedians();
   if (keepFocus) { const q = document.getElementById('q'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
 }
 function select(id, scroll) { S.vid = id; S.filter = null; S.q = ''; S.limit = 30; render(); if (scroll) document.getElementById('detail').scrollIntoView(); }
