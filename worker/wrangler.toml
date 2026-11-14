@@ -1,0 +1,14 @@
+# 只有用命令行部署时才需要这个文件；在 Cloudflare 网页后台粘贴代码的话可以忽略。
+name = "creator-signal"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+
+[vars]
+MODEL = "claude-sonnet-5-5"
+USER_BUDGET_USD = "5"
+DAILY_BUDGET_USD = "10"
+
+# 建好 KV 后把 id 填到这里
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = ""
