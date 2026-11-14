@@ -12,7 +12,7 @@
 --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,"PingFang SC","Microsoft YaHei",Helvetica,Arial,sans-serif}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-#batch,#detail,#compare,#comments,#method,#channel{scroll-margin-top:76px}
+#batch,#detail,#compare,#comments,#method,#channel,#fake,.tabbar{scroll-margin-top:76px}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans)}
 #code{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;image-rendering:pixelated;image-rendering:crisp-edges;opacity:.4}
@@ -72,6 +72,9 @@ button.rr:hover{background:rgba(255,255,255,.1)}
 .glow{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(520px 380px at 22% 34%,rgba(150,120,255,.20),transparent 70%),radial-gradient(620px 420px at 78% 62%,rgba(190,150,255,.14),transparent 70%)}
 .card.key{background:linear-gradient(140deg,rgba(210,196,255,.42),rgba(170,150,255,.26) 55%,rgba(255,255,255,.14));border-color:rgba(214,200,255,.45);backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 22px 70px rgba(124,92,255,.22)}
 .card.key .meta,.card.key .note,.card.key .tile .d,.card.key .tile .k,.card.key .toggle,.card.key .ai,.card.key .rr span,.card.key .lgd{color:#ddd6f3}
+.card.key2{background:linear-gradient(140deg,rgba(232,224,255,.56),rgba(206,192,255,.40) 55%,rgba(255,255,255,.26));border-color:rgba(236,228,255,.6);backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 18px 60px rgba(150,120,255,.2)}
+.card.key2 .note,.card.key2 .cmp td.usual,.card.key2 th{color:#efeafc}.card.key2 .cmp td,.card.key2 th{border-bottom-color:rgba(255,255,255,.22)}
+.card.key2 .lt{background:rgba(0,0,0,.28)}
 .card.key .tile,.card.key .rr{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.18)}
 .card.key .verdict{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.24)}.card.key .verdict span{color:#e4dcff}
 .card.key .ghost{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.26)}
@@ -79,7 +82,7 @@ button.rr:hover{background:rgba(255,255,255,.1)}
 .tile{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;min-height:132px}
 .tile .k{height:16px;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .tile .d{line-height:1.45}
-.tabbar{position:sticky;top:58px;z-index:4;margin:0 -24px 14px;padding:10px 24px;background:rgba(0,0,0,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--line);scroll-margin-top:58px}
+.tabbar{margin:8px 0 18px}
 .tabs{display:flex;gap:4px;padding:5px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid var(--line);width:max-content;max-width:100%;overflow-x:auto}
 .fd{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;background:#6e6e76;vertical-align:1px}.fd.ok{background:var(--want)}.fd.watch{background:var(--hesitant)}.fd.flag{background:var(--critical)}
 .lt{display:inline-flex;align-items:center;gap:6px;font:600 11.5px var(--sans);font-style:normal;padding:2px 9px;border-radius:999px;margin-left:8px;vertical-align:1px;background:rgba(255,255,255,.1);color:#c7c7cc;white-space:nowrap}
@@ -191,7 +194,7 @@ footer a{color:var(--ink)}
 <header><div class="wrap top">
   <div class="brand"><i></i>Creator Signal</div>
   <nav>
-    <a href="#compare" data-i="navCompare"></a><a href="#detail" data-tab="overview" data-i="tOverview"></a><a href="#detail" data-tab="audience" data-i="tAudience"></a><a href="#detail" data-tab="creator" data-i="tCreator"></a><a href="#detail" data-tab="comments" data-i="tComments"></a><a href="#method" data-i="navMethod"></a>
+    <a href="#compare" data-i="navCompare"></a><a href="#fake" data-i="navFake"></a><a href="#detail" data-tab="overview" data-i="tOverview"></a><a href="#detail" data-tab="audience" data-i="tAudience"></a><a href="#detail" data-tab="creator" data-i="tCreator"></a><a href="#detail" data-tab="comments" data-i="tComments"></a><a href="#method" data-i="navMethod"></a>
     <div class="lang"><button data-lang="en">EN</button><button data-lang="zh">中文</button></div>
   </nav>
 </div></header>
@@ -274,15 +277,15 @@ en:{
   chSp:'Declared sponsored videos', chOut:'Videos worth a closer look', chH:['Video','Date','Views','vs median','Like rate',''], chAn:'Analyse comments',
   chAsk:'What to ask the creator for before signing', chAskL:['Audience geography for the last 90 days. Bought traffic usually comes from places the creator does not speak to.','Traffic sources for recent videos. A large share from external or direct sources on a video with weak engagement needs an explanation.','Audience retention on two recent videos. Purchased views tend to leave within seconds.','Unique viewers and returning viewers, which are more telling than the public subscriber count.'],
   vch:'of the channel\'s usual views', vchOld:d=>`Keep in mind: this video came out on ${d}, before all of those. So it is being compared with how the channel performs today. If the channel has grown or shrunk since then, the comparison is less exact.`, v7:x=>`It reached ${x} times the channel\'s usual views.`,
-  tOverview:'Overview', tAudience:'Audience', tCreator:'Fake check', tComments:'Comments',
+  navFake:'Fake check', tOverview:'Overview', tAudience:'Audience', tCreator:'Channel and risks', tComments:'Comments',
   lvN:{ok:'Normal', watch:'Check', flag:'Abnormal', info:'For reference', load:'Loading'}, lvLg:'What the labels mean:', lvLgT:{ok:'nothing unusual', watch:'worth a second look', flag:'outside the normal range', info:'context only, not scored'},
   dotLg:'The dot before each name is the fake check result: green means no sign of bought subscribers or views, amber means some numbers need an explanation, red means several signs.',
   cmpH:['', 'This video', 'Channel usually', 'How it compares'], cmpViews:'Views', cmpLike:'Likes per view', cmpCom:'Comments per view',
-  cmpLow:(p,w)=>`Only ${p} of ${w}`, cmpSame:(p,w)=>`About the same as ${w} (${p})`, cmpHigh:(x,w)=>`${x} times ${w}`,
+  cmpLow:(p,w)=>`${p} of ${w}`, cmpSame:(p,w)=>`${p} of ${w}, about the same`, cmpHigh:(x,w,p)=>x >= 2 ? `${x.toFixed(1)} times ${w}` : `${p} of ${w}`,
   cmpLead:(k,p,w)=>k === 'low' ? `This video was watched only ${p} as much as the creator's ${w} videos.` : k === 'high' ? `This video was watched ${p} times as much as the creator's ${w} videos.` : `This video was watched about as much as the creator's ${w} videos (${p}).`,
   cmpBase:n=>`How "usually" is worked out: take the channel's 50 most recent uploads, leave out Shorts and live streams (${n} videos remain), sort them by views and take the one in the middle.`, cmpTag:{low:w=>`Below ${w}`, same:()=>'In line', high:w=>`Above ${w}`},
   cmpHP:['', 'This video', 'Same period', 'Channel today', 'Against the same period'],
-  cmpLeadP:'same-period', wUsual:['usual', 'the usual level', 'usual'], wPeriod:['same-period', 'the same-period level', 'same period'],
+  cmpLeadP:'same-period', cmpOut:'That makes it a one-off hit. When pricing this creator, go by their usual level.', wUsual:['usual', 'the usual level', 'usual'], wPeriod:['same-period', 'the same-period level', 'same period'],
   cmpBaseP:(n,a,b)=>`How "same period" is worked out: take the ${n} long videos the channel published just before and after this one (${a} to ${b}), sort them by views and take the one in the middle.`,
   cmpNow:n=>`"Channel today" is the same calculation on the ${n} most recent long videos.`,
   fkTitle:'Bought subscribers or views?', fk:{ok:'No sign of bought subscribers or views', watch:'Some numbers need an explanation', flag:'Several signs of bought subscribers or views', load:'Checking the channel…', info:'Channel data is not available'},
@@ -388,15 +391,15 @@ zh:{
   chSp:'已声明赞助的视频', chOut:'值得细看的视频', chH:['视频','日期','播放','相对中位数','点赞率',''], chAn:'分析评论',
   chAsk:'签约前建议向创作者要的数据', chAskL:['近 90 天的观众地区分布。买来的流量通常来自创作者并不面向的地区。','近期视频的流量来源。互动很弱的视频如果外部或直接来源占比很高，需要对方解释。','两条近期视频的观众留存曲线。买来的播放往往几秒内就离开。','独立观众数和回访观众数，它们比公开的粉丝数更说明问题。'],
   vch:'相当于频道平时播放量的倍数', vchOld:d=>`需要留意：这条视频发布于 ${d}，比上面这些视频都早。所以这里是拿它和频道现在的水平比。如果频道在这之后涨了或跌了，对比会有偏差。`, v7:x=>`播放量是该频道平时水平的 ${x} 倍。`,
-  tOverview:'概览', tAudience:'观众', tCreator:'买粉检测', tComments:'评论',
+  navFake:'买粉检测', tOverview:'概览', tAudience:'观众', tCreator:'频道与风险', tComments:'评论',
   lvN:{ok:'正常', watch:'留意', flag:'异常', info:'仅供参考', load:'加载中'}, lvLg:'标签含义：', lvLgT:{ok:'没有发现问题', watch:'值得多看一眼', flag:'超出正常范围', info:'只是背景信息，不计入判断'},
   dotLg:'名字前的圆点是买粉检测的结果：绿色表示没有发现买粉或买量的迹象，黄色表示有数据需要对方解释，红色表示多处迹象异常。',
   cmpH:['', '这条视频', '频道平时', '对比结果'], cmpViews:'播放量', cmpLike:'点赞率（点赞/播放）', cmpCom:'评论率（评论/播放）',
-  cmpLow:(p,w)=>`只有${w}的 ${p}`, cmpSame:(p,w)=>`和${w}差不多（${w}的 ${p}）`, cmpHigh:(x,w)=>`是${w}的 ${x} 倍`,
+  cmpLow:(p,w)=>`只有${w}的 ${p}`, cmpSame:(p,w)=>`${w}的 ${p}，差不多`, cmpHigh:(x,w,p)=>x >= 2 ? `是${w}的 ${x.toFixed(1)} 倍` : `${w}的 ${p}`,
   cmpLead:(k,p,w)=>k === 'low' ? `这条视频的播放量只有这位创作者${w}视频的 ${p}。` : k === 'high' ? `这条视频的播放量是这位创作者${w}视频的 ${p} 倍。` : `这条视频的播放量和这位创作者${w}视频差不多（${p}）。`,
   cmpBase:n=>`"频道平时"怎么算：取这个频道最近上传的 50 条视频，去掉短视频和直播后剩 ${n} 条，按播放量从低到高排，取正中间那一条的数。`, cmpTag:{low:w=>`低于${w}`, same:()=>'持平', high:w=>`高于${w}`},
   cmpHP:['', '这条视频', '同期水平', '频道现在', '对比结果（和同期比）'],
-  cmpLeadP:'同期', wUsual:['平时', '平时', '平时'], wPeriod:['同期', '同期', '同期'],
+  cmpLeadP:'同期', cmpOut:'这属于一次性的爆款。给这位创作者估价时，应该参考他平时的水平。', wUsual:['平时', '平时', '平时'], wPeriod:['同期', '同期', '同期'],
   cmpBaseP:(n,a,b)=>`"同期水平"怎么算：取这个频道在这条视频发布前后上传的 ${n} 条长视频（${a} 到 ${b}），按播放量从低到高排，取正中间那一条的数。`,
   cmpNow:n=>`"频道现在"是用最近的 ${n} 条长视频按同样方法算出来的。`,
   fkTitle:'有没有买粉买量', fk:{ok:'没有发现买粉或买量的迹象', watch:'有数据需要对方解释', flag:'多处迹象指向买粉或买量', load:'正在检查频道…', info:'暂时拿不到频道数据'},
@@ -552,7 +555,7 @@ const median = a => { const s = a.filter(x => !isNaN(x)).sort((x, y) => x - y); 
 function vsMedian(key, val) {
   if (D.videos.length < 3 || isNaN(val)) return '';
   const md = median(D.videos.map(x => metrics(x, S.weighted)[key])), d = Math.round((val - md) * 100);
-  return isNaN(md) ? '' : ' · ' + T.vsMed(d);
+  return isNaN(md) || d === 0 ? '' : ' · ' + T.vsMed(d);
 }
 function fitMap() {
   const pts = D.videos.map(v => ({v, m: metrics(v, S.weighted)})).filter(p => !isNaN(p.m.intent) && !isNaN(p.m.relevance));
@@ -806,13 +809,13 @@ function renderDetail() {
   const v = D.videos.find(x => x.id === S.vid), el = document.getElementById('detail');
   if (!v) { el.innerHTML = ''; return; }
   const m = metrics(v, S.weighted), top = m.bars[0];
-  const P = {overview:'', audience:'', creator:'', comments:''}; if (!P.hasOwnProperty(S.tab)) S.tab = 'overview';
+  let F = ''; const P = {overview:'', audience:'', creator:'', comments:''}; if (!P.hasOwnProperty(S.tab)) S.tab = 'overview';
   let h = `<div class="card key"><div class="vhead"><div>
       <h3>${esc(v.channel)}${v.paid ? `<span class="badge">${T.paid}</span>` : ''}${m.nRel < 30 ? `<span class="badge warn">${T.small}</span>` : ''}</h3>
       <div class="meta"><a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">${esc(v.title)}</a></div>
       <div class="meta">${T.meta(v, m)}</div>
     </div>
-    <div class="acts"><label class="toggle"><input type="checkbox" id="wt" ${S.weighted ? 'checked' : ''}> ${T.weight}</label><button class="ghost" id="chk">${T.chBtn}</button><button class="ghost" id="share">${T.copyLink}</button></div></div>
+    <div class="acts"><label class="toggle"><input type="checkbox" id="wt" ${S.weighted ? 'checked' : ''}> ${T.weight}</label><button class="ghost" id="share">${T.copyLink}</button></div></div>
     <div class="verdict"><span>${T.vLabel}</span>${esc(verdict(v, m))}</div>
     <div class="ai"><b>AI</b><span>${T.ai(esc(v.model || D.model || 'Claude'))}</span></div>
     <div class="tiles">
@@ -848,13 +851,13 @@ function renderDetail() {
     `<div class="meta" style="margin-top:8px">${T.noClue(m.layers.find(x => x.key === 'unknown').n, m.n)}</div>` +
     (m.comps.length ? `<div class="chips">` + m.comps.slice(0, 8).map(([name, n]) => `<button class="chip" data-f="c:${esc(name)}">${esc(name)} · ${n}</button>`).join('') + `</div>` : '') + `</div>`;
   const fk = fakeCheck(v); if (CHFULL[v.id] === undefined) ensureChannel(v);
-  P.creator += `<div class="card key"><h2>${T.fkTitle}</h2>${fkHead(fk)}${fk.rows.length ? fkRows(fk.rows) + `<div class="note">${T.chNote} ${T.chNoAi}</div>` : ''}</div>`;
+  F += `<div class="card key"><h2>${T.fkTitle}</h2>${fkHead(fk)}${fk.rows.length ? fkRows(fk.rows) + `<div class="note">${T.chNote} ${T.chNoAi}</div>` : ''}</div>`;
   const chF = CHFULL[v.id];
   if (chF && chF !== 'loading') {
-    const B = baseline(chF), st = B.st, bs = B.base, r0 = v.views / bs.med, W = B.use ? T.wPeriod : T.wUsual, say = r => isNaN(r) || !isFinite(r) ? ['info', 'n/a', ''] : r < .7 ? ['watch', T.cmpLow(pct(r), W[1]), T.cmpTag.low(W[2])] : r > 1.3 ? ['ok', T.cmpHigh(r.toFixed(1), W[1]), T.cmpTag.high(W[2])] : ['info', T.cmpSame(pct(r), W[1]), T.cmpTag.same()];
+    const B = baseline(chF), st = B.st, bs = B.base, r0 = v.views / bs.med, W = B.use ? T.wPeriod : T.wUsual, say = r => isNaN(r) || !isFinite(r) ? ['info', 'n/a', ''] : r < .7 ? ['watch', T.cmpLow(pct(r), W[1]), T.cmpTag.low(W[2])] : r > 1.3 ? ['ok', T.cmpHigh(r, W[1], pct(r)), T.cmpTag.high(W[2])] : ['info', T.cmpSame(pct(r), W[1]), T.cmpTag.same()];
     const rows = [[T.cmpViews, big(v.views), big(Math.round(bs.med)), big(Math.round(st.med)), r0], [T.cmpLike, pct(m.likeRate, 2), pct(bs.medLike, 2), pct(st.medLike, 2), m.likeRate / bs.medLike], [T.cmpCom, pct(m.commentRate, 3), pct(bs.medCom, 3), pct(st.medCom, 3), m.commentRate / bs.medCom]];
-    const lead = isNaN(r0) ? '' : T.cmpLead(r0 < .7 ? 'low' : r0 > 1.3 ? 'high' : 'same', r0 > 1.3 ? r0.toFixed(1) : pct(r0), W[0]), dates = bs.L.map(x => x.published.slice(0, 10)).sort();
-    P.creator += `<div class="card"><h2>${T.crTitle}</h2><p class="lead">${lead}</p>
+    const lead = isNaN(r0) ? '' : T.cmpLead(r0 < .7 ? 'low' : r0 > 1.3 ? 'high' : 'same', r0 > 1.3 ? r0.toFixed(1) : pct(r0), W[0]) + (r0 >= 5 ? ' ' + T.cmpOut : ''), dates = bs.L.map(x => x.published.slice(0, 10)).sort();
+    F += `<div class="card key2"><h2>${T.crTitle}</h2><p class="lead">${lead}</p>
       <div class="scroll"><table class="cmp"><thead><tr>${(B.use ? T.cmpHP : T.cmpH).map(x => '<th>' + x + '</th>').join('')}</tr></thead><tbody>` +
       rows.map(([name, a, b, c, r]) => { const [lv, text, tag] = say(r); return `<tr><td>${name}</td><td class="num">${a}</td><td class="usual">${b}</td>${B.use ? `<td class="usual">${c}</td>` : ''}<td>${text}${tag ? `<em class="lt ${lv}">${tag}</em>` : ''}</td></tr>`; }).join('') +
       `</tbody></table></div>` + (B.use ? `<div class="note">${T.cmpBaseP(bs.L.length, dates[0], dates[dates.length - 1])}</div><div class="note" style="margin-top:6px">${T.cmpNow(st.L.length)}</div>`
@@ -879,8 +882,8 @@ function renderDetail() {
         (c.cf === 'low' ? `<span class="tag">${T.lowTag}</span>` : '') +
         `<span>${c.k.toLocaleString()} ${T.likes}</span><button class="cp" data-cp="${esc(c.t)}">${T.copyQuote}</button></div></div>`).join('') : `<div class="empty" style="padding:16px 0">${T.noMatch}</div>`) +
     (list.length > S.limit ? `<button class="more" id="more">${T.more(list.length - S.limit)}</button>` : '') + `</div>`;
-  const tabs = [['overview', T.tOverview], ['audience', T.tAudience], ['creator', `<i class="fd ${fk.lv}"></i>` + T.tCreator], ['comments', T.tComments + ' · ' + v.comments.length]];
-  el.innerHTML = h + `<div class="tabbar"><div class="tabs">${tabs.map(([k, n]) => `<button data-tab="${k}" class="${S.tab === k ? 'on' : ''}">${n}</button>`).join('')}</div></div>` + P[S.tab];
+  const tabs = [['overview', T.tOverview], ['audience', T.tAudience], ['creator', T.tCreator], ['comments', T.tComments + ' · ' + v.comments.length]];
+  el.innerHTML = h + `<div id="fake">${F}</div><div class="tabbar"><div class="tabs">${tabs.map(([k, n]) => `<button data-tab="${k}" class="${S.tab === k ? 'on' : ''}">${n}</button>`).join('')}</div></div>` + P[S.tab];
   document.querySelectorAll('.top nav a[data-tab]').forEach(a => a.classList.toggle('on', a.dataset.tab === S.tab));
 }
 function render(keepFocus) {
