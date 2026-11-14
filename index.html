@@ -280,9 +280,9 @@ en:{
   cmpH:['', 'This video', 'Channel usually', 'How it compares'], cmpViews:'Views', cmpLike:'Likes per view', cmpCom:'Comments per view',
   cmpLow:(p,w)=>`Only ${p} of ${w}`, cmpSame:(p,w)=>`About the same as ${w} (${p})`, cmpHigh:(x,w)=>`${x} times ${w}`,
   cmpLead:(k,p,w)=>k === 'low' ? `This video was watched only ${p} as much as the creator's ${w} videos.` : k === 'high' ? `This video was watched ${p} times as much as the creator's ${w} videos.` : `This video was watched about as much as the creator's ${w} videos (${p}).`,
-  cmpBase:n=>`How "usually" is worked out: take the channel's 50 most recent uploads, leave out Shorts and live streams (${n} videos remain), sort them by views and take the one in the middle.`, cmpTag:{low:'Below usual', same:'In line', high:'Above usual'},
+  cmpBase:n=>`How "usually" is worked out: take the channel's 50 most recent uploads, leave out Shorts and live streams (${n} videos remain), sort them by views and take the one in the middle.`, cmpTag:{low:w=>`Below ${w}`, same:()=>'In line', high:w=>`Above ${w}`},
   cmpHP:['', 'This video', 'Same period', 'Channel today', 'Against the same period'],
-  cmpLeadP:'same-period', wUsual:['usual', 'the usual level'], wPeriod:['same-period', 'the same-period level'],
+  cmpLeadP:'same-period', wUsual:['usual', 'the usual level', 'usual'], wPeriod:['same-period', 'the same-period level', 'same period'],
   cmpBaseP:(n,a,b)=>`How "same period" is worked out: take the ${n} long videos the channel published just before and after this one (${a} to ${b}), sort them by views and take the one in the middle.`,
   cmpNow:n=>`"Channel today" is the same calculation on the ${n} most recent long videos.`,
   fkTitle:'Bought subscribers or views?', fk:{ok:'No sign of bought subscribers or views', watch:'Some numbers need an explanation', flag:'Several signs of bought subscribers or views', load:'Checking the channel…', info:'Channel data is not available'},
@@ -394,9 +394,9 @@ zh:{
   cmpH:['', '这条视频', '频道平时', '对比结果'], cmpViews:'播放量', cmpLike:'点赞率（点赞/播放）', cmpCom:'评论率（评论/播放）',
   cmpLow:(p,w)=>`只有${w}的 ${p}`, cmpSame:(p,w)=>`和${w}差不多（${w}的 ${p}）`, cmpHigh:(x,w)=>`是${w}的 ${x} 倍`,
   cmpLead:(k,p,w)=>k === 'low' ? `这条视频的播放量只有这位创作者${w}视频的 ${p}。` : k === 'high' ? `这条视频的播放量是这位创作者${w}视频的 ${p} 倍。` : `这条视频的播放量和这位创作者${w}视频差不多（${p}）。`,
-  cmpBase:n=>`"频道平时"怎么算：取这个频道最近上传的 50 条视频，去掉短视频和直播后剩 ${n} 条，按播放量从低到高排，取正中间那一条的数。`, cmpTag:{low:'低于平时', same:'正常水平', high:'高于平时'},
+  cmpBase:n=>`"频道平时"怎么算：取这个频道最近上传的 50 条视频，去掉短视频和直播后剩 ${n} 条，按播放量从低到高排，取正中间那一条的数。`, cmpTag:{low:w=>`低于${w}`, same:()=>'持平', high:w=>`高于${w}`},
   cmpHP:['', '这条视频', '同期水平', '频道现在', '对比结果（和同期比）'],
-  cmpLeadP:'同期', wUsual:['平时', '平时'], wPeriod:['同期', '同期'],
+  cmpLeadP:'同期', wUsual:['平时', '平时', '平时'], wPeriod:['同期', '同期', '同期'],
   cmpBaseP:(n,a,b)=>`"同期水平"怎么算：取这个频道在这条视频发布前后上传的 ${n} 条长视频（${a} 到 ${b}），按播放量从低到高排，取正中间那一条的数。`,
   cmpNow:n=>`"频道现在"是用最近的 ${n} 条长视频按同样方法算出来的。`,
   fkTitle:'有没有买粉买量', fk:{ok:'没有发现买粉或买量的迹象', watch:'有数据需要对方解释', flag:'多处迹象指向买粉或买量', load:'正在检查频道…', info:'暂时拿不到频道数据'},
@@ -851,7 +851,7 @@ function renderDetail() {
   P.creator += `<div class="card key"><h2>${T.fkTitle}</h2>${fkHead(fk)}${fk.rows.length ? fkRows(fk.rows) + `<div class="note">${T.chNote} ${T.chNoAi}</div>` : ''}</div>`;
   const chF = CHFULL[v.id];
   if (chF && chF !== 'loading') {
-    const B = baseline(chF), st = B.st, bs = B.base, r0 = v.views / bs.med, W = B.use ? T.wPeriod : T.wUsual, say = r => isNaN(r) || !isFinite(r) ? ['info', 'n/a', ''] : r < .7 ? ['watch', T.cmpLow(pct(r), W[1]), T.cmpTag.low] : r > 1.3 ? ['ok', T.cmpHigh(r.toFixed(1), W[1]), T.cmpTag.high] : ['info', T.cmpSame(pct(r), W[1]), T.cmpTag.same];
+    const B = baseline(chF), st = B.st, bs = B.base, r0 = v.views / bs.med, W = B.use ? T.wPeriod : T.wUsual, say = r => isNaN(r) || !isFinite(r) ? ['info', 'n/a', ''] : r < .7 ? ['watch', T.cmpLow(pct(r), W[1]), T.cmpTag.low(W[2])] : r > 1.3 ? ['ok', T.cmpHigh(r.toFixed(1), W[1]), T.cmpTag.high(W[2])] : ['info', T.cmpSame(pct(r), W[1]), T.cmpTag.same()];
     const rows = [[T.cmpViews, big(v.views), big(Math.round(bs.med)), big(Math.round(st.med)), r0], [T.cmpLike, pct(m.likeRate, 2), pct(bs.medLike, 2), pct(st.medLike, 2), m.likeRate / bs.medLike], [T.cmpCom, pct(m.commentRate, 3), pct(bs.medCom, 3), pct(st.medCom, 3), m.commentRate / bs.medCom]];
     const lead = isNaN(r0) ? '' : T.cmpLead(r0 < .7 ? 'low' : r0 > 1.3 ? 'high' : 'same', r0 > 1.3 ? r0.toFixed(1) : pct(r0), W[0]), dates = bs.L.map(x => x.published.slice(0, 10)).sort();
     P.creator += `<div class="card"><h2>${T.crTitle}</h2><p class="lead">${lead}</p>
