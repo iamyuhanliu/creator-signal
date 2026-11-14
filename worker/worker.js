@@ -16,7 +16,7 @@
 // 给模型的说明，和 labels.py 里的 PROMPT 保持一致
 const PROMPT = "You label YouTube comments left under a SPONSORED video about a video game.\nJudge only from the comment text and the video context given.\n\nReturn ONLY a JSON array. Each element is itself an array of exactly 10 values, in this order:\n[i, attitude, barrier1, barrier2, layer, competitor, ad, controversy, evidence, conf]\n\nattitude = stance toward THE GAME (not the creator):\n- \"want\": wants to play or buy, already plays and is positive, OR clearly praises the game itself (its features, look, setting, details) even without saying \"I will buy\".\n- \"hesitant\": interested but states a condition, wish, worry or reason for waiting.\n- \"critical\": negative or sceptical about the game itself.\n- \"offtopic\": about the creator, a joke, a meme, a timestamp, the video being funny. Praise for the creator or the video alone is offtopic.\n- \"unclear\": talks about the game (a neutral fact, a question, a comparison) but shows no stance.\nIf a comment both praises and lists wishes, use \"want\" when the praise dominates and nothing is stated as a condition; use \"hesitant\" when buying or liking \"depends on\" something.\n\nbarrier1 = main reason they are not playing yet. Use \"none\" unless attitude is \"hesitant\" or \"critical\".\n- \"awareness\": did not know the game or studio, or confused about what it is\n- \"theme\": setting, genre, art style or subject is not for them\n- \"skill\": too hard or complex\n- \"device\": their own PC, console or platform cannot run it; performance worries about their hardware\n- \"price\": cost, waiting for a sale, value for money\n- \"time\": too long, no time, backlog\n- \"prior\": has not played earlier games in the series\n- \"emotion\": too scary or stressful\n- \"social\": no one to play with\n- \"product\": missing features, bugs, quality, early-access state, wishes about what the game should include\n- \"loyal\": already committed to a competing game\n- \"none\"\nbarrier2 = a clearly separate second barrier, else \"none\". Do not repeat the same idea in two barriers.\n\nlayer = who the commenter is, when the text reveals it:\n- \"fan\": played earlier games in THIS series or by THIS studio\n- \"competitor\": names another game or series, or uses its vocabulary, in a way that shows they know or play it (for example \"I spent hours in CAS\", \"this is what I wanted Sims 5 to be\", \"a British Stalker\")\n- \"newcomer\": says they do not normally play this kind of game\n- \"unknown\": not revealed (most common)\ncompetitor = name of that other game, else \"\". It must be a game or game series from a DIFFERENT franchise. Earlier games in THIS series or by THIS studio make the commenter a \"fan\", not a \"competitor\". Never put a creator, channel or person in this field. A comment that only asks the creator to play or cover some other game next (\"play Timberborn next\") is \"offtopic\" with layer \"unknown\" and competitor \"\": it does not show the commenter is weighing that game against this one.\n\nad = reaction to the sponsorship:\n- \"accept\": explicitly fine with it or praises it\n- \"dislike\": complains about the ad, or doubts the creator's honesty because it is paid\n- \"neutral\": mentions the sponsor or sponsorship without judging it\n- \"none\": not mentioned\n\ncontroversy = 1 if the comment refers to a scandal, accusation or serious controversy about the CREATOR as a person, else 0. Jokes about in-game behaviour are 0.\n\nevidence = up to 8 words copied from the comment that drove the labels. Use \"\" when attitude is \"offtopic\".\nconf = \"h\" or \"l\". Use \"l\" for sarcasm you are unsure about, mixed signals, or text you cannot read well.\n\nSarcasm: label the real meaning. Do not invent a layer or barrier the text does not support.\n";
 
-const BATCH = 25, MAX_COMMENTS = 300, CONCURRENCY = 6, CACHE_DAYS = 30, VERSION = 'v2', BUILD = 'v7';
+const BATCH = 25, MAX_COMMENTS = 300, CONCURRENCY = 6, CACHE_DAYS = 30, VERSION = 'v2', BUILD = 'v8';
 // 网站首页默认展示的示例视频（已分析并长期保存）。想换示例就改这里的视频 id。
 const FEATURED = ['cMhbFcGM2J4', 'WjmUXrEhKY4'];
 const RESERVE_USD = 0.3;   // 开始分析前先预扣这么多，结束后按实际花费结算
@@ -80,25 +80,52 @@ const ADAPTERS = [youtube, apify];
 
 // ---------- 频道体检：只用公开数据，不调用模型，不花钱 ----------
 function seconds(iso) { const m = String(iso || '').match(/P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/); return m ? (+m[1] || 0) * 86400 + (+m[2] || 0) * 3600 + (+m[3] || 0) * 60 + (+m[4] || 0) : 0; }
+const VPARTS = 'snippet,statistics,contentDetails,paidProductPlacementDetails,liveStreamingDetails';
+const cnum = x => (x == null || isNaN(parseInt(x, 10))) ? null : parseInt(x, 10);
+const mapVideo = v => ({ id: v.id, title: v.snippet.title, published: v.snippet.publishedAt, views: cnum(v.statistics.viewCount), likes: cnum(v.statistics.likeCount), comments: cnum(v.statistics.commentCount),
+  dur: seconds(v.contentDetails.duration), paid: !!(v.paidProductPlacementDetails && v.paidProductPlacementDetails.hasPaidProductPlacement), live: !!v.liveStreamingDetails });
+// 老视频：往前翻上传列表找到它，取它前后各 20 条，作为“同期水平”的样本
+async function periodAround(env, uploads, vid) {
+  const pkey = 'chp:v1:' + vid, hit = await env.CACHE.get(pkey); if (hit) return JSON.parse(hit);
+  let ids = [], token = null, idx = -1;
+  for (let page = 0; page < 12; page++) {
+    const params = { part: 'contentDetails', playlistId: uploads, maxResults: '50' }; if (token) params.pageToken = token;
+    const pl = await youtube.api(env, 'playlistItems', params);
+    ids = ids.concat((pl.items || []).map(x => x.contentDetails.videoId)); token = pl.nextPageToken || null;
+    if (idx < 0) idx = ids.indexOf(vid);
+    if (!token || (idx >= 0 && ids.length >= idx + 21)) break;
+  }
+  let res = { found: false };
+  if (idx >= 0) {
+    const win = ids.slice(Math.max(0, idx - 20), idx + 21).filter(x => x !== vid);
+    const vs = win.length ? await youtube.api(env, 'videos', { part: VPARTS, id: win.join(',') }) : { items: [] };
+    res = { found: true, videos: (vs.items || []).map(mapVideo) };
+  }
+  await env.CACHE.put(pkey, JSON.stringify(res), { expirationTtl: (res.found ? 30 : 1) * 86400 });
+  return res;
+}
 async function channelAudit(env, link) {
-  const u = String(link || '').trim(), num = x => (x == null || isNaN(parseInt(x, 10))) ? null : parseInt(x, 10); let params = null, m;
+  const u = String(link || '').trim(); let params = null, m, vid = null;
   if ((m = u.match(/\/channel\/(UC[\w-]{22})/))) params = { id: m[1] };
   else if ((m = u.match(/youtube\.com\/@([^\/?#\s]+)/i))) params = { forHandle: '@' + decodeURIComponent(m[1]) };
   else if ((m = u.match(/^@([\w.\-]+)$/))) params = { forHandle: '@' + m[1] };
   else if ((m = u.match(/youtube\.com\/user\/([^\/?#\s]+)/i))) params = { forUsername: decodeURIComponent(m[1]) };
-  else { const vid = youtube.id(u); if (vid) { const v = await youtube.api(env, 'videos', { part: 'snippet', id: vid }); if (!v.items || !v.items.length) throw new HttpError(404, 'video_not_found', 'Video not found'); params = { id: v.items[0].snippet.channelId }; } }
+  else { vid = youtube.id(u); if (vid) { const v = await youtube.api(env, 'videos', { part: 'snippet', id: vid }); if (!v.items || !v.items.length) throw new HttpError(404, 'video_not_found', 'Video not found'); params = { id: v.items[0].snippet.channelId }; } }
   if (!params) throw new HttpError(400, 'channel_link', 'Use a channel link with @handle or /channel/, or any video link from the channel');
   const ch = await youtube.api(env, 'channels', { part: 'snippet,statistics,contentDetails', ...params });
   if (!ch.items || !ch.items.length) throw new HttpError(404, 'channel_not_found', 'Channel not found');
-  const c = ch.items[0], key = 'ch:v1:' + c.id, hit = await env.CACHE.get(key); if (hit) return JSON.parse(hit);
-  const pl = await youtube.api(env, 'playlistItems', { part: 'contentDetails', playlistId: c.contentDetails.relatedPlaylists.uploads, maxResults: '50' });
-  const ids = (pl.items || []).map(x => x.contentDetails.videoId);
-  const vs = ids.length ? await youtube.api(env, 'videos', { part: 'snippet,statistics,contentDetails,paidProductPlacementDetails,liveStreamingDetails', id: ids.join(',') }) : { items: [] };
-  const out = { id: c.id, title: c.snippet.title, handle: c.snippet.customUrl || '', country: c.snippet.country || '', created: (c.snippet.publishedAt || '').slice(0, 10),
-    subs: c.statistics.hiddenSubscriberCount ? null : num(c.statistics.subscriberCount), totalViews: num(c.statistics.viewCount), videoCount: num(c.statistics.videoCount), checked: new Date().toISOString().slice(0, 10),
-    videos: (vs.items || []).map(v => ({ id: v.id, title: v.snippet.title, published: v.snippet.publishedAt, views: num(v.statistics.viewCount), likes: num(v.statistics.likeCount), comments: num(v.statistics.commentCount),
-      dur: seconds(v.contentDetails.duration), paid: !!(v.paidProductPlacementDetails && v.paidProductPlacementDetails.hasPaidProductPlacement), live: !!v.liveStreamingDetails })) };
-  await env.CACHE.put(key, JSON.stringify(out), { expirationTtl: 86400 });
+  const c = ch.items[0], uploads = c.contentDetails.relatedPlaylists.uploads, key = 'ch:v1:' + c.id, hit = await env.CACHE.get(key);
+  let out = hit ? JSON.parse(hit) : null;
+  if (!out) {
+    const pl = await youtube.api(env, 'playlistItems', { part: 'contentDetails', playlistId: uploads, maxResults: '50' });
+    const ids = (pl.items || []).map(x => x.contentDetails.videoId);
+    const vs = ids.length ? await youtube.api(env, 'videos', { part: VPARTS, id: ids.join(',') }) : { items: [] };
+    out = { id: c.id, title: c.snippet.title, handle: c.snippet.customUrl || '', country: c.snippet.country || '', created: (c.snippet.publishedAt || '').slice(0, 10),
+      subs: c.statistics.hiddenSubscriberCount ? null : cnum(c.statistics.subscriberCount), totalViews: cnum(c.statistics.viewCount), videoCount: cnum(c.statistics.videoCount), checked: new Date().toISOString().slice(0, 10),
+      videos: (vs.items || []).map(mapVideo) };
+    await env.CACHE.put(key, JSON.stringify(out), { expirationTtl: 86400 });
+  }
+  if (vid && !out.videos.some(x => x.id === vid)) { try { out = { ...out, period: await periodAround(env, uploads, vid) }; } catch (e) { out = { ...out, period: { found: false } }; } }
   return out;
 }
 
