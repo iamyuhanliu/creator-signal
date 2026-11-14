@@ -508,7 +508,7 @@ function metrics(v, weighted) {
   const att = {}; ORDER.forEach(a => att[a] = {w: W(c => c.a === a), n: N(c => c.a === a)});
   const bars = BKEYS.map(b => ({key:b, w: W(c => c.b1 === b || c.b2 === b), n: N(c => c.b1 === b || c.b2 === b)})).filter(x => x.n).sort((x, y) => y.w - x.w);
   const layers = LKEYS.map(l => ({key:l, w: W(c => c.l === l), n: N(c => c.l === l)}));
-  const comp = {}; v.comments.forEach(c => { if (c.c) comp[c.c] = (comp[c.c] || 0) + 1; });
+  const comp = {}, own = (v.title + ' ' + D.videos.map(x => x.channel).join(' ')).toLowerCase(); v.comments.forEach(c => { if (c.c && c.c.length > 2 && !own.includes(c.c.toLowerCase())) comp[c.c] = (comp[c.c] || 0) + 1; });   // 去掉同系列作品和创作者名字
   return {
     n: v.comments.length, nRel: N(c => c.a !== 'offtopic'), all, rel, att, bars, layers,
     comps: Object.entries(comp).sort((x, y) => y[1] - x[1]),
