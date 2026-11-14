@@ -12,7 +12,7 @@
 --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,"PingFang SC","Microsoft YaHei",Helvetica,Arial,sans-serif}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-#batch,#detail,#compare,#comments,#method,#channel,.tabs{scroll-margin-top:76px}
+#batch,#detail,#compare,#comments,#method,#channel{scroll-margin-top:76px}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans)}
 #code{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;image-rendering:pixelated;image-rendering:crisp-edges;opacity:.4}
@@ -79,7 +79,15 @@ button.rr:hover{background:rgba(255,255,255,.1)}
 .tile{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;min-height:132px}
 .tile .k{height:16px;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .tile .d{line-height:1.45}
-.tabs{position:sticky;top:68px;z-index:4;display:flex;gap:4px;padding:5px;margin:0 0 18px;border-radius:999px;background:rgba(26,26,30,.86);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--line);width:max-content;max-width:100%;overflow-x:auto}
+.tabbar{position:sticky;top:58px;z-index:4;margin:0 -24px 14px;padding:10px 24px;background:rgba(0,0,0,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--line);scroll-margin-top:58px}
+.tabs{display:flex;gap:4px;padding:5px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid var(--line);width:max-content;max-width:100%;overflow-x:auto}
+.fd{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;background:#6e6e76;vertical-align:1px}.fd.ok{background:var(--want)}.fd.watch{background:var(--hesitant)}.fd.flag{background:var(--critical)}
+.fk{display:flex;gap:16px;align-items:center;padding:20px 22px;border-radius:18px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);margin-bottom:16px}
+.fk>i{flex:none;width:18px;height:18px;border-radius:50%;background:#8e8e96}
+.fk b{display:block;font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.25}.fk span{display:block;font-size:14px;margin-top:4px;color:#e3def5}
+.fk.ok{background:rgba(46,204,138,.16);border-color:rgba(46,204,138,.55)}.fk.ok>i{background:var(--want)}
+.fk.watch{background:rgba(240,170,60,.16);border-color:rgba(240,170,60,.6)}.fk.watch>i{background:var(--hesitant)}
+.fk.flag{background:rgba(240,90,90,.18);border-color:rgba(240,90,90,.65)}.fk.flag>i{background:var(--critical)}
 .tabs button{border:0;background:none;color:var(--mute);padding:8px 20px;border-radius:999px;font-size:14.5px;font-weight:500;white-space:nowrap}
 .tabs button:hover{color:var(--ink)}.tabs button.on{background:#f5f5f7;color:#000}
 .top nav a.on{color:var(--ink)}
@@ -256,7 +264,9 @@ en:{
   chSp:'Declared sponsored videos', chOut:'Videos worth a closer look', chH:['Video','Date','Views','vs median','Like rate',''], chAn:'Analyse comments',
   chAsk:'What to ask the creator for before signing', chAskL:['Audience geography for the last 90 days. Bought traffic usually comes from places the creator does not speak to.','Traffic sources for recent videos. A large share from external or direct sources on a video with weak engagement needs an explanation.','Audience retention on two recent videos. Purchased views tend to leave within seconds.','Unique viewers and returning viewers, which are more telling than the public subscriber count.'],
   vch:'of the channel\'s usual views', vchOld:'This video is older than the channel\'s last 50 uploads, so it is compared with the channel as it is today.', v7:x=>`It reached ${x} times the channel\'s usual views.`,
-  tOverview:'Overview', tAudience:'Audience', tCreator:'Creator', tComments:'Comments', crTitle:'This video against the creator\'s other videos', crLoading:'Loading the creator\'s channel…', crNone:'Channel data is not available for this video.',
+  tOverview:'Overview', tAudience:'Audience', tCreator:'Fake check', tComments:'Comments',
+  fkTitle:'Bought subscribers or views?', fk:{ok:'No sign of bought subscribers or views', watch:'Some numbers need an explanation', flag:'Several signs of bought subscribers or views', load:'Checking the channel…', info:'Channel data is not available'},
+  fkSub:(n,f,w)=>`${n} checks on public data: ${f} failed, ${w} need a closer look. The creator's own analytics settle it.`, chMore:'Channel details', crTitle:'This video against the creator\'s other videos', crLoading:'Loading the creator\'s channel…', crNone:'Channel data is not available for this video.',
   qTitle:'Quotes worth using', qNote:'The most liked comment of each kind.',
   port:(n,views,med,cpm)=>`<span><b>${n}</b> videos</span><span><b>${views}</b> total views</span><span>median want to play <b>${med}</b></span>` + (cpm ? `<span>blended CPM <b>$${cpm}</b></span>` : ''),
   roadTitle:'On the roadmap', road:['TikTok, Twitch and Instagram through the reserved platform adapter, once the data source has had a legal review.','Creator vetting from the open web: recent news and forum threads about a creator, listed with their sources and no verdict.','One-click translation of comments.','A one page PDF report per creator.'],
@@ -358,7 +368,9 @@ zh:{
   chSp:'已声明赞助的视频', chOut:'值得细看的视频', chH:['视频','日期','播放','相对中位数','点赞率',''], chAn:'分析评论',
   chAsk:'签约前建议向创作者要的数据', chAskL:['近 90 天的观众地区分布。买来的流量通常来自创作者并不面向的地区。','近期视频的流量来源。互动很弱的视频如果外部或直接来源占比很高，需要对方解释。','两条近期视频的观众留存曲线。买来的播放往往几秒内就离开。','独立观众数和回访观众数，它们比公开的粉丝数更说明问题。'],
   vch:'相当于频道平时播放量的倍数', vchOld:'这条视频不在频道最近 50 条上传之内，这里是和频道现在的水平比较。', v7:x=>`播放量是该频道平时水平的 ${x} 倍。`,
-  tOverview:'概览', tAudience:'观众', tCreator:'创作者', tComments:'评论', crTitle:'这条视频和创作者其他视频比', crLoading:'正在加载创作者的频道数据…', crNone:'这条视频暂时拿不到频道数据。',
+  tOverview:'概览', tAudience:'观众', tCreator:'买粉检测', tComments:'评论',
+  fkTitle:'有没有买粉买量', fk:{ok:'没有发现买粉或买量的迹象', watch:'有数据需要对方解释', flag:'多处迹象指向买粉或买量', load:'正在检查频道…', info:'暂时拿不到频道数据'},
+  fkSub:(n,f,w)=>`基于公开数据的 ${n} 项检查：${f} 项异常，${w} 项需要留意。最终以创作者后台数据为准。`, chMore:'频道详情', crTitle:'这条视频和创作者其他视频比', crLoading:'正在加载创作者的频道数据…', crNone:'这条视频暂时拿不到频道数据。',
   qTitle:'值得引用的评论', qNote:'每一类里点赞最多的那条。',
   port:(n,views,med,cpm)=>`<span><b>${n}</b> 条视频</span><span>总播放 <b>${views}</b></span><span>想玩占比中位数 <b>${med}</b></span>` + (cpm ? `<span>综合 CPM <b>$${cpm}</b></span>` : ''),
   roadTitle:'后续计划', road:['通过预留的平台接口接入 TikTok、Twitch 和 Instagram，前提是数据来源通过法务确认。','全网创作者背调：列出关于创作者的近期新闻和论坛讨论，只给来源，不下结论。','评论一键翻译。','每位创作者导出一页 PDF 报告。'],
@@ -443,7 +455,7 @@ async function loadMedians() {
       if (r.ok && Array.isArray(ch.videos)) { const st = chStats(ch); CHM[v.id] = {med: st.med, n: st.L.length, inS: ch.videos.some(x => x.id === v.id)}; CHFULL[v.id] = ch; } else CHM[v.id] = null;
     } catch (e) { CHM[v.id] = null; }
     try { sessionStorage.setItem('cs-chm', JSON.stringify(CHM)); } catch (e) {}
-    renderCompare(); if (v.id === S.vid && document.activeElement.id !== 'q') renderDetail();
+    renderCompare(); if (v.id === S.vid && !(document.activeElement && document.activeElement.id === 'q')) renderDetail();
   }
   S.chmBusy = false;
 }
@@ -599,10 +611,20 @@ function chTable(title, rows) {
   return `<div class="sub2">${title}</div><div class="scroll"><table class="chv"><thead><tr>${T.chH.map(h => '<th>' + h + '</th>').join('')}</tr></thead><tbody>` +
     rows.slice(0, 8).map(v => `<tr><td class="tt"><a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">${esc(v.title)}</a></td><td>${v.published.slice(0, 10)}</td><td>${big(v.views)}</td><td>${isNaN(v.x) ? 'n/a' : v.x.toFixed(1) + 'x'}</td><td>${pct(v.lr, 2)}</td><td><button class="ghost" data-an="${v.id}">${T.chAn}</button></td></tr>`).join('') + `</tbody></table></div>`;
 }
+function fkLevel(rows) { const f = rows.filter(x => x.lv === 'flag').length, w = rows.filter(x => x.lv === 'watch').length; return {lv: f >= 2 ? 'flag' : f === 1 || w >= 2 ? 'watch' : 'ok', f, w, n: rows.length, rows}; }
+function fakeCheck(v) {
+  const ch = CHFULL[v.id]; if (!ch || ch === 'loading') return {lv: ch === null || !API ? 'info' : 'load', rows: []};
+  const rows = chSignals(ch, chStats(ch)).slice(0, 6); audit(v); const nd = v.comments.filter(c => c._d).length, n = v.comments.length || 1;
+  rows.push({label: T.rDup, value: T.rShare(nd, pct(nd / n)), lv: nd / n >= .1 ? 'flag' : nd / n >= .04 ? 'watch' : 'ok'});
+  return fkLevel(rows);
+}
+const fkHead = k => `<div class="fk ${k.lv}"><i></i><div><b>${T.fk[k.lv]}</b>${k.rows.length ? `<span>${T.fkSub(k.n, k.f, k.w)}</span>` : ''}</div></div>`;
+const fkRows = rows => `<div class="rk">${rows.map(x => `<div class="rr"><i class="lv ${x.lv}"></i><div><b>${x.label}</b><span>${x.value}</span></div></div>`).join('')}</div>`;
 function channelHTML(ch, standalone) {
   const st = chStats(ch), n = st.L.length;
-  return `<div class="card${standalone ? ' key' : ''}"><div class="hrow"><h2>${T.chTitle}</h2>${standalone ? `<button class="ghost" id="chclose">${T.chClose}</button>` : ''}</div>
-    <div class="vhead"><div><h3>${esc(ch.title)}</h3><div class="meta">${esc(T.chMeta(ch))}</div></div></div>
+  const k = fkLevel(chSignals(ch, st).slice(0, 6));
+  return `<div class="card${standalone ? ' key' : ''}"><div class="hrow"><h2>${standalone ? T.fkTitle : T.chMore}</h2>${standalone ? `<button class="ghost" id="chclose">${T.chClose}</button>` : ''}</div>
+    <div class="vhead"><div><h3>${esc(ch.title)}</h3><div class="meta">${esc(T.chMeta(ch))}</div></div></div>${standalone ? '<div style="margin-top:16px">' + fkHead(k) + '</div>' : ''}
     <div class="tiles">
       <div class="tile"><div class="k">${T.chK[0]}</div><div class="v">${ch.subs == null ? 'n/a' : big(ch.subs)}</div><div class="d">${ch.subs == null ? T.chD.hidden : ''}</div></div>
       <div class="tile"><div class="k">${T.chK[1]}</div><div class="v">${big(Math.round(st.med))}</div><div class="d">${T.chD.base(n)}</div></div>
@@ -611,8 +633,7 @@ function channelHTML(ch, standalone) {
       <div class="tile"><div class="k">${T.chK[4]}</div><div class="v">${pct(st.medCom, 3)}</div><div class="d">${T.chD.base(n)}</div></div>
       <div class="tile"><div class="k">${T.chK[5]}</div><div class="v">${st.sp.length}</div><div class="d">${T.chD.sp(st.sp.length, n)}</div></div>
     </div>
-    <div class="sub2">${T.chSig}</div><div class="rk">${chSignals(ch, st).map(x => `<div class="rr"><i class="lv ${x.lv}"></i><div><b>${x.label}</b><span>${x.value}</span></div></div>`).join('')}</div>
-    <div class="note">${T.chNote} ${T.chNoAi}</div>
+    ${standalone ? `<div class="sub2">${T.chSig}</div>${fkRows(chSignals(ch, st))}<div class="note">${T.chNote} ${T.chNoAi}</div>` : ''}
     ${chChart(st)}${chTable(T.chOut, st.spikes.concat(st.L.filter(v => !v.spike && v.x >= 5)).sort((a, b) => b.views - a.views))}${chTable(T.chSp, st.sp.slice().reverse())}
     <div class="sub2">${T.chAsk}</div><ul class="nb">${T.chAskL.map(x => '<li>' + x + '</li>').join('')}</ul></div>`;
 }
@@ -720,9 +741,9 @@ function renderStatic() {
 }
 function renderCompare() {
   document.getElementById('rows').innerHTML = sorted().map(({v, m}) => {
-    const nf = risk(v, m).filter(x => x.lv === 'flag').length;
+    const fk = fakeCheck(v);
     return `<tr data-vid="${v.id}" class="${v.id === S.vid ? 'on' : ''}">
-      <td><b>${esc(v.channel)}</b>${nf ? `<span class="badge warn" title="${T.rBadge(nf)}">${nf}</span>` : ''}${v.live ? `<button class="rm" data-rm="${v.id}" title="${T.remove}">×</button>` : ''}<div class="t">${esc(v.title)}</div></td>
+      <td><i class="fd ${fk.lv}" title="${T.fk[fk.lv]}"></i><b>${esc(v.channel)}</b>${v.live ? `<button class="rm" data-rm="${v.id}" title="${T.remove}">×</button>` : ''}<div class="t">${esc(v.title)}</div></td>
       <td>${big(v.views)}</td><td>${isNaN(vsCh(v)) ? (CHM[v.id] === undefined && API ? '…' : 'n/a') : vsCh(v).toFixed(2) + 'x'}</td><td>${pct(m.likeRate, 1)}</td>
       <td>${pct(m.relevance)}</td><td>${pct(m.intent)}</td><td>${pct(m.hesitant)}</td>
       <td>${m.bars[0] ? esc(T.b[m.bars[0].key]) : T.none}</td><td>${pct(m.competitor)}</td><td>${pct(m.adDislike)}</td>
@@ -788,7 +809,9 @@ function renderDetail() {
     known.map(x => `<button class="bar" data-f="l:${x.key}"><span>${T.l[x.key]}</span><span><i style="width:${x.n ? Math.max(4, x.w / maxL * 100) : 0}%"></i></span><span class="n">${x.n}</span></button>`).join('') +
     `<div class="meta" style="margin-top:8px">${T.noClue(m.layers.find(x => x.key === 'unknown').n, m.n)}</div>` +
     (m.comps.length ? `<div class="chips">` + m.comps.slice(0, 8).map(([name, n]) => `<button class="chip" data-f="c:${esc(name)}">${esc(name)} · ${n}</button>`).join('') + `</div>` : '') + `</div>`;
-  P.creator += `<div class="card key"><h2>${T.crTitle}</h2><div class="health">
+  const fk = fakeCheck(v); if (CHFULL[v.id] === undefined) ensureChannel(v);
+  P.creator += `<div class="card key"><h2>${T.fkTitle}</h2>${fkHead(fk)}${fk.rows.length ? fkRows(fk.rows) + `<div class="note">${T.chNote} ${T.chNoAi}</div>` : ''}</div>`;
+  P.creator += `<div class="card"><h2>${T.crTitle}</h2><div class="health">
       <div><b>${isNaN(m.viewsPerSub) ? 'n/a' : m.viewsPerSub.toFixed(2) + 'x'}</b><span>${T.vps}</span></div>
       <div><b>${pct(m.likeRate, 2)}</b><span>${T.lpv}</span></div>
       <div><b>${pct(m.commentRate, 3)}</b><span>${T.cpv}</span></div>
@@ -796,8 +819,8 @@ function renderDetail() {
   P.creator += `<div class="card"><h2>${T.rTitle}</h2><div class="rk">` +
     risk(v, m).map(x => { const inner = `<i class="lv ${x.lv}"></i><div><b>${x.label}</b><span>${x.value}</span></div>`; return x.f ? `<button class="rr" data-f="${x.f}">${inner}</button>` : `<div class="rr">${inner}</div>`; }).join('') +
     `</div><div class="note">${T.rNote} <a href="https://www.google.com/search?tbm=nws&q=${encodeURIComponent('"' + v.channel + '"')}" target="_blank" rel="noopener">${esc(T.rNews(v.channel))}</a></div></div>`;
-  const full = CHFULL[v.id]; if (full === undefined) ensureChannel(v);
-  P.creator += full && full !== 'loading' ? channelHTML(full, false) : `<div class="card"><div class="empty">${full === null || !API ? T.crNone : T.crLoading}</div></div>`;
+  const full = CHFULL[v.id];
+  if (full && full !== 'loading') P.creator += channelHTML(full, false);
   const list = currentList();
   P.comments += `<div class="card" id="comments"><div class="hrow"><h2>${T.behind}</h2><button class="ghost" id="csv2">${T.exportComments}</button></div>
     <div class="row"><input type="text" id="q" placeholder="${T.search}" value="${esc(S.q)}">${lang === 'zh' && window.CS_TRANSLATE && API ? `<button class="ghost" id="tr" ${S.trBusy ? 'disabled' : ''}>${S.trBusy ? T.trBusy : T.trBtn}</button>` : ''}</div>${S.trErr ? `<div class="note">${T.trFail}</div>` : ''}
@@ -812,8 +835,8 @@ function renderDetail() {
         (c.cf === 'low' ? `<span class="tag">${T.lowTag}</span>` : '') +
         `<span>${c.k.toLocaleString()} ${T.likes}</span><button class="cp" data-cp="${esc(c.t)}">${T.copyQuote}</button></div></div>`).join('') : `<div class="empty" style="padding:16px 0">${T.noMatch}</div>`) +
     (list.length > S.limit ? `<button class="more" id="more">${T.more(list.length - S.limit)}</button>` : '') + `</div>`;
-  const tabs = [['overview', T.tOverview], ['audience', T.tAudience], ['creator', T.tCreator], ['comments', T.tComments + ' · ' + v.comments.length]];
-  el.innerHTML = h + `<div class="tabs">${tabs.map(([k, n]) => `<button data-tab="${k}" class="${S.tab === k ? 'on' : ''}">${n}</button>`).join('')}</div>` + P[S.tab];
+  const tabs = [['overview', T.tOverview], ['audience', T.tAudience], ['creator', `<i class="fd ${fk.lv}"></i>` + T.tCreator], ['comments', T.tComments + ' · ' + v.comments.length]];
+  el.innerHTML = h + `<div class="tabbar"><div class="tabs">${tabs.map(([k, n]) => `<button data-tab="${k}" class="${S.tab === k ? 'on' : ''}">${n}</button>`).join('')}</div></div>` + P[S.tab];
   document.querySelectorAll('.top nav a[data-tab]').forEach(a => a.classList.toggle('on', a.dataset.tab === S.tab));
 }
 function render(keepFocus) {
@@ -825,7 +848,7 @@ function select(id, scroll) { S.vid = id; S.filter = null; S.q = ''; S.limit = 3
 document.addEventListener('click', e => {
   if (e.target.closest('input.fee')) return;
   const tb = e.target.closest('[data-tab]');
-  if (tb) { e.preventDefault(); S.tab = tb.dataset.tab; renderDetail(); if (tb.tagName === 'A') document.getElementById('detail').scrollIntoView(); else { const t = document.querySelector('.tabs'); if (t && t.getBoundingClientRect().top < 70) t.scrollIntoView(); } return; }
+  if (tb) { e.preventDefault(); S.tab = tb.dataset.tab; renderDetail(); if (tb.tagName === 'A') document.getElementById('detail').scrollIntoView(); else { const t = document.querySelector('.tabbar'); if (t && t.getBoundingClientRect().top <= 60) t.scrollIntoView(); } return; }
   if (e.target.id === 'chk') return channelCheck('https://www.youtube.com/watch?v=' + S.vid);
   if (e.target.id === 'chclose') { S.ch = null; return renderChannel(); }
   const anb = e.target.closest('[data-an]'); if (anb) { document.getElementById('url').value = 'https://www.youtube.com/watch?v=' + anb.dataset.an; return analyse(); }
@@ -851,7 +874,7 @@ document.addEventListener('click', e => {
   if (f) {
     const raw = f.dataset.f, i = raw.indexOf(':');
     S.filter = raw ? {k: raw.slice(0, i), v: raw.slice(i + 1)} : null; S.limit = 30; S.tab = 'comments'; render();
-    document.querySelector('.tabs').scrollIntoView();
+    document.querySelector('.tabbar').scrollIntoView();
   }
 });
 document.addEventListener('change', e => {
