@@ -62,6 +62,31 @@ select{height:34px;border-radius:10px;border:1px solid var(--line);background:rg
 .bscroll table{font-size:14px}.bscroll th{position:sticky;top:0;background:#1b1b1e;cursor:default;text-align:left}.bscroll td{text-align:left;padding:9px 10px;cursor:default}
 .bscroll tbody tr{cursor:default}.bscroll td.u{max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:12.5px var(--mono);color:var(--mute)}
 .st{white-space:nowrap}.st.done,.st.have{color:#63e2ab}.st.error{color:#ff9c9c}.st.running{color:#f3bd63}.st.dup,.st.channel,.st.platform,.st.ytother{color:var(--mute)}
+.rk{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media(max-width:820px){.rk{grid-template-columns:1fr}}
+.rr{display:grid;grid-template-columns:12px 1fr;gap:10px;align-items:start;width:100%;text-align:left;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+button.rr:hover{background:rgba(255,255,255,.1)}
+.rr .lv{width:10px;height:10px;border-radius:50%;margin-top:6px;background:#6e6e76}.rr .lv.ok{background:var(--want)}.rr .lv.watch{background:var(--hesitant)}.rr .lv.flag{background:var(--critical)}
+.rr b{display:block;font-weight:600;font-size:14.5px}.rr span{font-size:13.5px;color:var(--mute)}
+.note{font-size:13px;color:var(--mute);margin-top:12px}
+.port{display:flex;gap:22px;flex-wrap:wrap;font-size:14px;color:var(--mute);margin:-4px 0 14px}.port b{color:var(--ink);font-weight:600}
+.qs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}@media(max-width:820px){.qs{grid-template-columns:1fr}}
+.q{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.q p{margin:0;font-size:15px;line-height:1.55;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.q .tags{margin-top:auto}
+.road{margin:16px 0 0;padding:14px 0 0 20px;border-top:1px solid var(--line)}.method h3{font-size:14px;margin:18px 0 0;color:var(--ink)}
+.nb{margin:0;padding-left:20px;font-size:15.5px;line-height:1.6}.nb li{margin-bottom:8px}
+.mx{width:100%;border-collapse:separate;border-spacing:4px;font-size:13.5px}
+.mx th{font:600 11.5px var(--sans);text-transform:none;letter-spacing:0;color:var(--mute);text-align:center;padding:4px;border:0;white-space:normal;cursor:default;vertical-align:bottom}
+.mx th:first-child{text-align:left}.mx td{padding:0;border:0;text-align:center}.mx td:first-child{text-align:left;color:var(--ink);padding-right:10px;white-space:nowrap}
+.mx tbody tr{cursor:default}.mx tbody tr:hover{background:none}
+.mx button{width:100%;min-width:44px;height:36px;border:0;border-radius:8px;font:600 14px var(--mono)}.mx button:hover{outline:2px solid rgba(255,255,255,.6)}
+.mx .z{display:block;height:36px;line-height:36px;border-radius:8px;background:rgba(255,255,255,.03);color:#55555c}
+.fit{margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.fit svg{width:100%;height:auto;display:block}.fit circle{cursor:pointer}
+.acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.rm{border:0;background:none;color:var(--mute);font-size:15px;padding:0 4px;margin-left:4px}.rm:hover{color:#ff9c9c}
+.cp{border:0;background:none;color:var(--mute);font-size:12px;padding:0;text-decoration:underline;text-underline-offset:2px}.cp:hover{color:var(--ink)}
 .prog{height:4px;border-radius:2px;background:rgba(255,255,255,.1);margin-top:14px;overflow:hidden}.prog i{display:block;height:100%;background:#f5f5f7;transition:width .3s}
 .notice{background:rgba(240,170,60,.1);border:1px solid rgba(240,170,60,.35);color:#f3c77e;border-radius:8px;padding:10px 14px;font-size:14px;margin-bottom:16px}
 table{width:100%;border-collapse:collapse;font-size:15px}
@@ -153,7 +178,7 @@ footer a{color:var(--ink)}
     <div class="scroll"><table><thead><tr id="heads"></tr></thead><tbody id="rows"></tbody></table></div>
   </div>
   <div id="detail"></div>
-  <div class="card method" id="method"><h2 data-i="methodTitle"></h2><ul id="methodList"></ul></div>
+  <div class="card method" id="method"><h2 data-i="methodTitle"></h2><ul id="methodList"></ul><div id="road"></div></div>
   <footer><span><span data-i="by"></span> Yuhan Liu · <a href="mailto:iamyuhanliu@gmail.com">iamyuhanliu@gmail.com</a></span><span id="foot"></span></footer>
 </div></main>
 
@@ -190,6 +215,25 @@ en:{
   bHeads:['Row','Creator','Link','Status','Want to play'],
   bs:{ready:'Ready', have:'Already analysed', dup:'Duplicate of a link above', channel:'Channel link. A video link is needed', ytother:'Not a video link', platform:'Platform not supported yet', running:'Analysing…', done:'Done'},
   xHeads:['Video title','Channel','Views','Views / subs','Like rate','About the game','Want to play','Hesitant','Top barrier','Competitor players','Ad pushback','CPM (USD)','In one line','Status'],
+  qTitle:'Quotes worth using', qNote:'The most liked comment of each kind.',
+  port:(n,views,med,cpm)=>`<span><b>${n}</b> videos</span><span><b>${views}</b> total views</span><span>median want to play <b>${med}</b></span>` + (cpm ? `<span>blended CPM <b>$${cpm}</b></span>` : ''),
+  roadTitle:'On the roadmap', road:['TikTok, Twitch and Instagram through the reserved platform adapter, once the data source has had a legal review.','Creator vetting from the open web: recent news and forum threads about a creator, listed with their sources and no verdict.','One-click translation of comments.','A one page PDF report per creator.'],
+  nextTitle:'Suggested next brief', nextNote:'Generated from the numbers above by fixed rules, as a starting point for discussion.',
+  nb:{low:p=>`Only ${p} of comments are about the game. Ask for the game to drive the premise of the next video, or treat this creator as reach rather than conversion.`,
+    fit:'The audience talks about the game and wants it. Rebook this creator, and reuse the strongest comments as social proof.',
+    comp:(p,c)=>`${p} of commenters reveal they play ${c}. Brief a direct comparison: what this game does that ${c} does not.`,
+    hes:p=>`${p} of interested viewers are waiting on something. A follow-up video after the next update or price change could convert them.`,
+    ad:n=>`${n} comments push back on the sponsorship. Let the creator keep their usual format and state the sponsorship early and plainly.`,
+    small:'There are too few comments about the game to act on these with confidence.',
+    b:{product:'Viewers question features or quality. Give the creator the roadmap or the fix so the next video can show it.',price:'Price is the sticking point. Time the next video with a discount or bundle and give the creator a tracked link.',device:'Viewers doubt it will run on their hardware. Ask the creator to show performance on a mid-range setup.',theme:'The theme or genre puts some viewers off. Lead with the hook that travels across genres, or test a creator from a neighbouring genre.',skill:'It looks hard to some viewers. Brief a beginner friendly first hour.',time:'Viewers say they lack time. Brief a short-session angle: what you can do in 20 minutes.',awareness:'Viewers are unsure what the game is. Ask for a plain one-line explanation in the first 30 seconds.',prior:'Viewers think they need the earlier games. Have the creator say clearly that they do not.',emotion:'Some find it too intense. Show the calmer side or the difficulty options.',social:'Viewers have no one to play with. Show solo play or matchmaking.',loyal:'Viewers are committed to another game. Position this one as a second game, not a replacement.'}},
+  mxTitle:'Who is blocked by what', mxNote:'Rows are who the commenter is, columns are the barrier they name. Click a cell to read those comments.',
+  rTitle:'Creator risk signals', rNote:'These are signals, not verdicts. Read the comments and check the source before acting on any of them.',
+  rCv:'Controversy about the creator', rAd:'Sponsorship pushback', rAdV:(d,n)=>`${d} dislike it, ${n} mention it`, rDis:'Disclosure', rDisOk:'Paid promotion is declared to YouTube', rDisBad:'Viewers mention a sponsorship, but no paid promotion is declared', rDisNone:'No sponsorship detected',
+  rDup:'Repeated comments', rLow:'Very short comments', rShare:(n,p)=>`${n} comments, ${p}`, rNews:c=>`Search recent news about ${c}`, rBadge:n=>`${n} risk signal${n === 1 ? '' : 's'} flagged`,
+  fDup:'Repeated comments', fLow:'Very short comments', fLb:(l,b)=>`${l} · ${b}`,
+  fitTitle:'Fit map', fitX:'Share of comments about the game', fitY:'Want to play', fitNote:'Bubble size is views. Click a bubble to open that video.',
+  fitQ:['Small but keen','Converts','Reach only','Talks, not convinced'],
+  vsMed:d=>`${d >= 0 ? '+' : ''}${d} pts vs median`, copyLink:'Copy link', copied:'Copied', copyQuote:'Copy quote', remove:'Remove from this list',
   exportTable:'Export table', exportComments:'Export these comments', feePh:'add',
   vLabel:'In one line',
   v1:p=>`The audience came for the creator: only ${p} of comments are about the game.`,
@@ -225,7 +269,8 @@ en:{
     'Accuracy check: on a 100 comment test set, the model matched a reference answer on stance for 92 comments and on barrier for 99. The reference answer was adjudicated by a stronger model and has not yet been fully checked by a person.',
     'Want to play and Hesitant are shares of comments about the game, not of all comments. Comments about the creator or jokes count as not about the game.',
     'Commenters are a small and unusual part of the audience. Use these numbers to compare videos and to find reasons, not to forecast sales.',
-    'A video with fewer than 30 comments about the game is marked as a small sample.']
+    'A video with fewer than 30 comments about the game is marked as a small sample.',
+    'Risk signals are simple checks: the model flags comments about a controversy involving the creator, and the page counts repeated and very short comments. They can be wrong in both directions and are a prompt to look, not a finding.']
 },
 zh:{
   navCompare:'对比', navDetail:'视频详情', navMethod:'方法与局限',
@@ -251,6 +296,25 @@ zh:{
   bHeads:['行','创作者','链接','状态','想玩'],
   bs:{ready:'待分析', have:'已分析过', dup:'和上面的链接重复', channel:'这是频道链接，需要具体的视频链接', ytother:'不是视频链接', platform:'暂不支持这个平台', running:'分析中…', done:'完成'},
   xHeads:['视频标题','频道','播放','播放/粉丝','点赞率','游戏相关度','想玩','犹豫','首要门槛','竞品玩家','广告反感','CPM (USD)','一句话结论','状态'],
+  qTitle:'值得引用的评论', qNote:'每一类里点赞最多的那条。',
+  port:(n,views,med,cpm)=>`<span><b>${n}</b> 条视频</span><span>总播放 <b>${views}</b></span><span>想玩占比中位数 <b>${med}</b></span>` + (cpm ? `<span>综合 CPM <b>$${cpm}</b></span>` : ''),
+  roadTitle:'后续计划', road:['通过预留的平台接口接入 TikTok、Twitch 和 Instagram，前提是数据来源通过法务确认。','全网创作者背调：列出关于创作者的近期新闻和论坛讨论，只给来源，不下结论。','评论一键翻译。','每位创作者导出一页 PDF 报告。'],
+  nextTitle:'下一份 brief 的建议', nextNote:'由上面的数字按固定规则生成，用作讨论的起点。',
+  nb:{low:p=>`只有 ${p} 的评论聊到游戏。下一条视频可以要求让游戏成为视频的主线，或者把这位创作者当作曝光渠道而不是转化渠道。`,
+    fit:'观众在聊游戏，而且想玩。可以复投这位创作者，并把最有力的评论拿来做口碑素材。',
+    comp:(p,c)=>`${p} 的评论者透露自己在玩 ${c}。可以在 brief 里要求做正面对比：这款游戏有哪些 ${c} 没有的东西。`,
+    hes:p=>`${p} 的感兴趣观众在等某件事。下次更新或调价之后再投一条跟进视频，有机会转化他们。`,
+    ad:n=>`有 ${n} 条评论反感赞助。让创作者保持自己平时的风格，并且尽早、明确地说明是赞助内容。`,
+    small:'聊到游戏的评论太少，这些建议只能作参考。',
+    b:{product:'观众在质疑功能或质量。把更新计划或修复情况提供给创作者，让下一条视频能展示出来。',price:'卡在价格上。下一条视频配合折扣或捆绑包，并给创作者带追踪的链接。',device:'观众担心自己的设备带不动。请创作者展示中等配置下的运行效果。',theme:'题材或类型劝退了一部分人。用跨类型都能懂的卖点开场，或者试一位相邻品类的创作者。',skill:'有人觉得太难。可以要求做一条新手友好的第一小时。',time:'观众说没时间。可以做短时段的角度：20 分钟能玩到什么。',awareness:'观众不清楚这是什么游戏。要求前 30 秒用一句大白话讲清楚。',prior:'观众以为要先玩前作。请创作者明确说不需要。',emotion:'有人觉得太刺激。展示更轻松的一面或难度选项。',social:'观众没人一起玩。展示单人玩法或匹配功能。',loyal:'观众已经认定了另一款游戏。把这款定位成第二款游戏，而不是替代品。'}},
+  mxTitle:'谁被什么拦住', mxNote:'行是评论者的身份，列是他们提到的门槛。点格子可以看对应的评论。',
+  rTitle:'创作者风险信号', rNote:'这些只是信号，不是结论。采取行动前请先看评论原文并核对来源。',
+  rCv:'关于创作者本人的争议', rAd:'赞助引起的反感', rAdV:(d,n)=>`${d} 条反感，${n} 条提到`, rDis:'赞助声明', rDisOk:'已向 YouTube 声明付费推广', rDisBad:'观众提到了赞助，但视频没有声明付费推广', rDisNone:'没有发现赞助迹象',
+  rDup:'重复评论', rLow:'极短评论', rShare:(n,p)=>`${n} 条，占 ${p}`, rNews:c=>`搜索 ${c} 的近期新闻`, rBadge:n=>`有 ${n} 项风险信号`,
+  fDup:'重复评论', fLow:'极短评论', fLb:(l,b)=>`${l} · ${b}`,
+  fitTitle:'匹配度地图', fitX:'聊到游戏的评论占比', fitY:'想玩占比', fitNote:'圆圈大小代表播放量。点圆圈可以打开对应视频。',
+  fitQ:['量小但意愿强','能转化','只有曝光','有讨论但没被说服'],
+  vsMed:d=>`比中位数${d >= 0 ? '高' : '低'} ${Math.abs(d)} 个百分点`, copyLink:'复制链接', copied:'已复制', copyQuote:'复制这条评论', remove:'从列表中移除',
   exportTable:'导出表格', exportComments:'导出这些评论', feePh:'填写',
   vLabel:'一句话结论',
   v1:p=>`观众是冲着创作者来的：只有 ${p} 的评论聊到游戏。`,
@@ -286,10 +350,12 @@ zh:{
     '准确率检验：在 100 条测试评论上，模型的态度判断有 92 条与参考答案一致，门槛判断有 99 条一致。参考答案由更强的模型裁决，尚未经过人工完整复核。',
     '想玩和犹豫的占比，分母是游戏相关的评论，不是全部评论。只聊创作者或玩梗的评论算作与游戏无关。',
     '留言的人只是观众里很小且不典型的一部分。这些数字适合用来对比视频、寻找原因，不适合用来预测销量。',
-    '游戏相关评论不足 30 条的视频会标记为样本偏少。']
+    '游戏相关评论不足 30 条的视频会标记为样本偏少。',
+    '风险信号是简单的检查：模型标出提到创作者本人争议的评论，页面统计重复评论和极短评论。它们可能误报也可能漏报，只用来提示你去看，不是结论。']
 }};
 let lang = 'en';
-try { lang = new URLSearchParams(location.search).get('lang') || localStorage.getItem('cs-lang') || ((navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en'); } catch (e) {}
+const HASH = new URLSearchParams(location.hash.slice(1));
+try { lang = HASH.get('lang') || new URLSearchParams(location.search).get('lang') || localStorage.getItem('cs-lang') || ((navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en'); } catch (e) {}
 if (!I[lang]) lang = 'en';
 let T = I[lang];
 const COLOR = {want:'var(--want)',hesitant:'var(--hesitant)',critical:'var(--critical)',unclear:'var(--unclear)',offtopic:'var(--offtopic)'};
@@ -325,6 +391,67 @@ function verdict(v, m) {
   if (m.nRel < 30) s.push(T.v6(m.nRel));
   return s.join(' ');
 }
+function audit(v) {
+  if (v._aud) return;
+  const cnt = {}, norm = c => c.t.toLowerCase().replace(/[^a-z0-9一-龥 ]+/g, '').replace(/\s+/g, ' ').trim();
+  const ns = v.comments.map(norm); ns.forEach(n => { if (n.length >= 15) cnt[n] = (cnt[n] || 0) + 1; });
+  v.comments.forEach((c, i) => { c._d = ns[i].length >= 15 && cnt[ns[i]] > 1 ? 1 : 0; c._l = ns[i].split(' ').filter(Boolean).length <= 2 ? 1 : 0; });
+  v._aud = 1;
+}
+function risk(v, m) {
+  audit(v);
+  const n = m.n || 1, nd = v.comments.filter(c => c._d).length, nl = v.comments.filter(c => c._l).length, said = m.nAd > 0 || /#ad\b|#spon|sponsored/i.test(v.title);
+  return [
+    {label: T.rCv, value: T.nComments(m.nCv), lv: m.nCv >= 3 ? 'flag' : m.nCv >= 1 ? 'watch' : 'ok', f: 'cv:1'},
+    {label: T.rAd, value: T.rAdV(m.nDislike, m.nAd), lv: m.nDislike / n >= .03 ? 'flag' : m.nDislike >= 1 ? 'watch' : 'ok', f: 'ad:any'},
+    {label: T.rDis, value: v.paid ? T.rDisOk : said ? T.rDisBad : T.rDisNone, lv: v.paid ? 'ok' : said ? 'flag' : 'info', f: v.paid ? '' : said ? 'ad:any' : ''},
+    {label: T.rDup, value: T.rShare(nd, pct(nd / n)), lv: nd / n >= .1 ? 'flag' : nd / n >= .04 ? 'watch' : 'ok', f: 'dupc:1'},
+    {label: T.rLow, value: T.rShare(nl, pct(nl / n)), lv: nl / n >= .5 ? 'watch' : 'info', f: 'low:1'},
+    {label: T.low, value: T.nComments(m.nLow), lv: m.nLow / n >= .15 ? 'watch' : 'info', f: 'cf:low'}
+  ];
+}
+function brief(v, m) {
+  const out = [], top = m.bars[0], comp = m.comps[0];
+  if (m.relevance < .25) out.push(T.nb.low(pct(m.relevance)));
+  else if (m.intent >= .5 && m.relevance >= .4) out.push(T.nb.fit);
+  if (top && top.n >= 3 && T.nb.b[top.key]) out.push(T.nb.b[top.key]);
+  if (m.competitor >= .15 && comp) out.push(T.nb.comp(pct(m.competitor), comp[0]));
+  if (m.hesitant >= .2 && m.att.hesitant.n >= 5) out.push(T.nb.hes(pct(m.hesitant)));
+  if (m.nDislike >= 3) out.push(T.nb.ad(m.nDislike));
+  if (m.nRel < 30) out.push(T.nb.small);
+  return out;
+}
+const median = a => { const s = a.filter(x => !isNaN(x)).sort((x, y) => x - y); return s.length ? (s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2) : NaN; };
+function vsMedian(key, val) {
+  if (D.videos.length < 3 || isNaN(val)) return '';
+  const md = median(D.videos.map(x => metrics(x, S.weighted)[key])), d = Math.round((val - md) * 100);
+  return isNaN(md) ? '' : ' · ' + T.vsMed(d);
+}
+function fitMap() {
+  if (D.videos.length < 3) return '';
+  const W = 720, H = 300, L = 52, R = 16, Tp = 16, Bt = 40, pw = W - L - R, ph = H - Tp - Bt, pts = D.videos.map(v => ({v, m: metrics(v, S.weighted)})).filter(p => !isNaN(p.m.intent));
+  const mx = Math.max(...pts.map(p => p.v.views || 1)), X = x => L + x * pw, Y = y => Tp + (1 - y) * ph;
+  let g = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${T.fitTitle}">`;
+  [0, .25, .5, .75, 1].forEach(t => { g += `<line x1="${X(t)}" y1="${Tp}" x2="${X(t)}" y2="${Tp + ph}" stroke="rgba(255,255,255,${t === .5 ? .22 : .07})"/><line x1="${L}" y1="${Y(t)}" x2="${L + pw}" y2="${Y(t)}" stroke="rgba(255,255,255,${t === .5 ? .22 : .07})"/>` +
+    `<text x="${X(t)}" y="${H - 22}" fill="#aeaeb6" font-size="11" text-anchor="middle">${t * 100}%</text><text x="${L - 8}" y="${Y(t) + 4}" fill="#aeaeb6" font-size="11" text-anchor="end">${t * 100}%</text>`; });
+  [[X(0) + 8, Tp + 14, 'start', 0], [X(1) - 8, Tp + 14, 'end', 1], [X(0) + 8, Tp + ph - 8, 'start', 2], [X(1) - 8, Tp + ph - 8, 'end', 3]].forEach(([x, y, a, i]) => { g += `<text x="${x}" y="${y}" fill="#6e6e76" font-size="11" text-anchor="${a}">${T.fitQ[i]}</text>`; });
+  g += `<text x="${L + pw / 2}" y="${H - 4}" fill="#aeaeb6" font-size="11.5" text-anchor="middle">${T.fitX}</text><text transform="translate(13 ${Tp + ph / 2}) rotate(-90)" fill="#aeaeb6" font-size="11.5" text-anchor="middle">${T.fitY}</text>`;
+  pts.sort((a, b) => (b.v.views || 0) - (a.v.views || 0)).forEach(p => {
+    const r = 6 + 18 * Math.sqrt((p.v.views || 1) / mx), x = X(Math.min(1, p.m.relevance)), y = Y(Math.min(1, p.m.intent)), on = p.v.id === S.vid, left = x > L + pw * .7;
+    g += `<circle data-vid2="${p.v.id}" cx="${x}" cy="${y}" r="${r}" fill="rgba(245,245,247,${on ? .55 : .16})" stroke="#f5f5f7" stroke-width="${on ? 2 : 1}"><title>${esc(p.v.channel)}</title></circle>` +
+      `<text x="${left ? x - r - 5 : x + r + 5}" y="${y + 4}" fill="#f5f5f7" font-size="12" text-anchor="${left ? 'end' : 'start'}" pointer-events="none">${esc(p.v.channel)}</text>`;
+  });
+  return `<div class="fit"><h2>${T.fitTitle}</h2>${g}</svg><div class="note">${T.fitNote}</div></div>`;
+}
+function shareUrl() {
+  const h = 'v=' + S.vid + (S.filter ? '&f=' + encodeURIComponent(S.filter.k + ':' + S.filter.v) : '') + '&lang=' + lang;
+  return location.href.split('#')[0].split('?')[0] + '#' + h;
+}
+function copyText(text, btn) {
+  const done = () => { if (btn) { const o = btn.textContent; btn.textContent = T.copied; setTimeout(() => { btn.textContent = o; }, 1400); } };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, () => {});
+  else { const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (e) {} ta.remove(); }
+}
 function download(name, rows) {
   const csv = '\ufeff' + rows.map(r => r.map(x => '"' + String(x == null ? '' : x).replace(/"/g, '""') + '"').join(',')).join('\r\n');
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'})); a.download = name;
@@ -354,6 +481,9 @@ function match(c, f) {
   if (f.k === 'ad') return f.v === 'any' ? c.ad !== 'none' : c.ad === f.v;
   if (f.k === 'cv') return c.cv === 1;
   if (f.k === 'cf') return c.cf === 'low';
+  if (f.k === 'dupc') return c._d === 1;
+  if (f.k === 'low') return c._l === 1;
+  if (f.k === 'lb') { const [l, b] = f.v.split('|'); return c.l === l && (c.b1 === b || c.b2 === b); }
   return true;
 }
 function filterName(f) {
@@ -365,6 +495,9 @@ function filterName(f) {
   if (f.k === 'ad') return f.v === 'any' ? T.fAd : T.ad[f.v];
   if (f.k === 'cv') return T.cv;
   if (f.k === 'cf') return T.low;
+  if (f.k === 'dupc') return T.fDup;
+  if (f.k === 'low') return T.fLow;
+  if (f.k === 'lb') { const [l, b] = f.v.split('|'); return T.fLb(T.l[l], T.b[b]); }
   return '';
 }
 function metrics(v, weighted) {
@@ -399,17 +532,24 @@ function renderStatic() {
   document.getElementById('samples').innerHTML = D.videos.map(v => `<button class="chip" data-sample="${v.id}">${esc(v.channel)}</button>`).join('');
   document.getElementById('notice').innerHTML = !D.videos.length ? `<div class="notice">${T.nodata}</div>` : D.partial ? `<div class="notice">${T.partial}</div>` : '';
   document.getElementById('methodList').innerHTML = T.method(esc(D.model || 'Claude')).map(x => '<li>' + x + '</li>').join('');
+  document.getElementById('road').innerHTML = `<h3>${T.roadTitle}</h3><ul class="road">${T.road.map(x => '<li>' + x + '</li>').join('')}</ul>`;
   document.getElementById('foot').textContent = T.foot(D.videos.length, D.videos.reduce((s, v) => s + v.comments.length, 0), D.generated || '');
 }
 function renderCompare() {
   document.getElementById('rows').innerHTML = sorted().map(({v, m}) => {
+    const nf = risk(v, m).filter(x => x.lv === 'flag').length;
     return `<tr data-vid="${v.id}" class="${v.id === S.vid ? 'on' : ''}">
-      <td><b>${esc(v.channel)}</b><div class="t">${esc(v.title)}</div></td>
+      <td><b>${esc(v.channel)}</b>${nf ? `<span class="badge warn" title="${T.rBadge(nf)}">${nf}</span>` : ''}${v.live ? `<button class="rm" data-rm="${v.id}" title="${T.remove}">×</button>` : ''}<div class="t">${esc(v.title)}</div></td>
       <td>${big(v.views)}</td><td>${isNaN(m.viewsPerSub) ? 'n/a' : m.viewsPerSub.toFixed(2) + 'x'}</td><td>${pct(m.likeRate, 1)}</td>
       <td>${pct(m.relevance)}</td><td>${pct(m.intent)}</td><td>${pct(m.hesitant)}</td>
       <td>${m.bars[0] ? esc(T.b[m.bars[0].key]) : T.none}</td><td>${pct(m.competitor)}</td><td>${pct(m.adDislike)}</td>
       <td><input type="text" class="fee" data-fee="${v.id}" value="${esc(S.fees[v.id] || '')}" placeholder="${T.feePh}" inputmode="decimal"></td><td>${isNaN(cpm(v)) ? 'n/a' : '$' + cpm(v).toFixed(2)}</td></tr>`;
   }).join('');
+  let port = document.getElementById('port'); if (!port) { port = document.createElement('div'); port.id = 'port'; port.className = 'port'; document.querySelector('#compare .hrow').after(port); }
+  const all = sorted(), tv = all.reduce((a, x) => a + (x.v.views || 0), 0), fv = all.filter(x => !isNaN(fee(x.v))), tf = fv.reduce((a, x) => a + fee(x.v), 0), fviews = fv.reduce((a, x) => a + (x.v.views || 0), 0);
+  port.innerHTML = all.length ? T.port(all.length, big(tv), pct(median(all.map(x => x.m.intent))), fv.length && fviews ? (tf / fviews * 1000).toFixed(2) : '') : '';
+  let fit = document.getElementById('fit'); if (!fit) { fit = document.createElement('div'); fit.id = 'fit'; document.getElementById('compare').appendChild(fit); }
+  fit.innerHTML = fitMap();
 }
 function highlight(text, ev) {
   const t = esc(text); if (!ev) return t;
@@ -429,16 +569,20 @@ function renderDetail() {
       <div class="meta"><a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">${esc(v.title)}</a></div>
       <div class="meta">${T.meta(v, m)}</div>
     </div>
-    <label class="toggle"><input type="checkbox" id="wt" ${S.weighted ? 'checked' : ''}> ${T.weight}</label></div>
+    <div class="acts"><label class="toggle"><input type="checkbox" id="wt" ${S.weighted ? 'checked' : ''}> ${T.weight}</label><button class="ghost" id="share">${T.copyLink}</button></div></div>
     <div class="verdict"><span>${T.vLabel}</span>${esc(verdict(v, m))}</div>
     <div class="tiles">
-      ${tile(T.kRel, pct(m.relevance), T.ofAll(m.nRel, m.n), 'related:1', false, T.tip.rel)}
-      ${tile(T.kWant, pct(m.intent), T.ofRel(m.att.want.n, m.nRel), 'a:want', false, T.tip.want)}
+      ${tile(T.kRel, pct(m.relevance), T.ofAll(m.nRel, m.n) + vsMedian('relevance', m.relevance), 'related:1', false, T.tip.rel)}
+      ${tile(T.kWant, pct(m.intent), T.ofRel(m.att.want.n, m.nRel) + vsMedian('intent', m.intent), 'a:want', false, T.tip.want)}
       ${tile(T.kHes, pct(m.hesitant), T.ofRel(m.att.hesitant.n, m.nRel), 'a:hesitant', false, T.tip.hes)}
       ${tile(T.kBar, top ? esc(T.b[top.key]) : T.noBar, top ? T.nComments(top.n) : T.noBarD, top ? 'b:' + top.key : '', true, T.tip.bar)}
       ${tile(T.kComp, pct(m.competitor), T.ofAll(m.nComp, m.n), 'l:competitor', false, T.tip.comp)}
       ${tile(T.kAd, pct(m.adDislike), T.adD(m.nDislike, m.nAd), 'ad:any', false, T.tip.ad)}
     </div></div>`;
+  const nb = brief(v, m);
+  if (nb.length) h += `<div class="card"><h2>${T.nextTitle}</h2><ul class="nb">${nb.map(x => '<li>' + esc(x) + '</li>').join('')}</ul><div class="note">${T.nextNote}</div></div>`;
+  const qs = ['want', 'hesitant', 'critical'].map(a => v.comments.filter(c => c.a === a && c.t.length >= 25).sort((x, y) => y.k - x.k)[0]).filter(Boolean);
+  if (qs.length) h += `<div class="card"><h2>${T.qTitle}</h2><div class="qs">` + qs.map(c => `<div class="q"><p>${highlight(c.t, c.ev)}</p><div class="tags"><span class="tag ${c.a}">${T.a[c.a]}</span><span>${c.k.toLocaleString()} ${T.likes}</span><button class="cp" data-cp="${esc(c.t)}">${T.copyQuote}</button></div></div>`).join('') + `</div><div class="note">${T.qNote}</div></div>`;
   h += `<div class="grid"><div class="card"><h2>${T.stance}</h2><div class="stack">` +
     ORDER.map(a => m.att[a].w ? `<button data-f="a:${a}" title="${T.a[a]}" style="width:${m.att[a].w / m.all * 100}%;background:${COLOR[a]}"></button>` : '').join('') +
     `</div><div class="legend">` +
@@ -448,6 +592,12 @@ function renderDetail() {
   h += `<div class="card"><h2>${T.holding}</h2>` +
     (m.bars.length ? m.bars.map(b => `<button class="bar" data-f="b:${b.key}"><span>${T.b[b.key]}</span><span><i style="width:${Math.max(4, b.w / maxB * 100)}%"></i></span><span class="n">${b.n}</span></button>`).join('')
       : `<div class="empty">${T.noReason}</div>`) + `</div></div>`;
+  if (m.bars.length) {
+    const cols = m.bars.slice(0, 7).map(b => b.key), cell = (l, b) => v.comments.filter(c => c.l === l && (c.b1 === b || c.b2 === b)).length, big2 = Math.max(1, ...LKEYS.map(l => Math.max(...cols.map(b => cell(l, b)))));
+    h += `<div class="card"><h2>${T.mxTitle}</h2><div class="scroll"><table class="mx"><thead><tr><th></th>${cols.map(b => '<th>' + T.b[b] + '</th>').join('')}</tr></thead><tbody>` +
+      LKEYS.map(l => `<tr><td>${T.l[l]}</td>` + cols.map(b => { const n = cell(l, b); return '<td>' + (n ? `<button data-f="lb:${l}|${b}" style="background:rgba(245,245,247,${(.12 + .68 * n / big2).toFixed(2)});color:${n / big2 > .45 ? '#000' : '#f5f5f7'}">${n}</button>` : '<span class="z">0</span>') + '</td>'; }).join('') + '</tr>').join('') +
+      `</tbody></table></div><div class="note">${T.mxNote}</div></div>`;
+  }
   const known = m.layers.filter(x => x.key !== 'unknown'), maxL = Math.max(1, ...known.map(x => x.w));
   h += `<div class="grid"><div class="card"><h2>${T.who}</h2>` +
     known.map(x => `<button class="bar" data-f="l:${x.key}"><span>${T.l[x.key]}</span><span><i style="width:${x.n ? Math.max(4, x.w / maxL * 100) : 0}%"></i></span><span class="n">${x.n}</span></button>`).join('') +
@@ -457,7 +607,10 @@ function renderDetail() {
       <div><b>${isNaN(m.viewsPerSub) ? 'n/a' : m.viewsPerSub.toFixed(2) + 'x'}</b><span>${T.vps}</span></div>
       <div><b>${pct(m.likeRate, 2)}</b><span>${T.lpv}</span></div>
       <div><b>${pct(m.commentRate, 3)}</b><span>${T.cpv}</span></div></div>
-      <div class="chips"><button class="chip" data-f="cv:1">${T.cv} · ${m.nCv}</button><button class="chip" data-f="cf:low">${T.low} · ${m.nLow}</button></div></div></div>`;
+      </div></div>`;
+  h += `<div class="card"><h2>${T.rTitle}</h2><div class="rk">` +
+    risk(v, m).map(x => { const inner = `<i class="lv ${x.lv}"></i><div><b>${x.label}</b><span>${x.value}</span></div>`; return x.f ? `<button class="rr" data-f="${x.f}">${inner}</button>` : `<div class="rr">${inner}</div>`; }).join('') +
+    `</div><div class="note">${T.rNote} <a href="https://www.google.com/search?tbm=nws&q=${encodeURIComponent('"' + v.channel + '"')}" target="_blank" rel="noopener">${esc(T.rNews(v.channel))}</a></div></div>`;
   const list = currentList();
   h += `<div class="card" id="comments"><div class="hrow"><h2>${T.behind}</h2><button class="ghost" id="csv2">${T.exportComments}</button></div>
     <div class="row"><input type="text" id="q" placeholder="${T.search}" value="${esc(S.q)}"></div>
@@ -470,7 +623,7 @@ function renderDetail() {
         (c.ad && c.ad !== 'none' ? `<span class="tag">${T.ad[c.ad] || esc(c.ad)}</span>` : '') +
         (c.cv ? `<span class="tag critical">${T.cvTag}</span>` : '') +
         (c.cf === 'low' ? `<span class="tag">${T.lowTag}</span>` : '') +
-        `<span>${c.k.toLocaleString()} ${T.likes}</span></div></div>`).join('') : `<div class="empty" style="padding:16px 0">${T.noMatch}</div>`) +
+        `<span>${c.k.toLocaleString()} ${T.likes}</span><button class="cp" data-cp="${esc(c.t)}">${T.copyQuote}</button></div></div>`).join('') : `<div class="empty" style="padding:16px 0">${T.noMatch}</div>`) +
     (list.length > S.limit ? `<button class="more" id="more">${T.more(list.length - S.limit)}</button>` : '') + `</div>`;
   el.innerHTML = h;
 }
@@ -482,6 +635,10 @@ function select(id, scroll) { S.vid = id; S.filter = null; S.q = ''; S.limit = 3
 
 document.addEventListener('click', e => {
   if (e.target.closest('input.fee')) return;
+  if (e.target.id === 'share') return copyText(shareUrl(), e.target);
+  const cpb = e.target.closest('[data-cp]'); if (cpb) { const v = D.videos.find(x => x.id === S.vid); return copyText('"' + cpb.dataset.cp + '" (comment on ' + (v ? v.channel + ', ' : '') + 'youtu.be/' + S.vid + ')', cpb); }
+  const rmb = e.target.closest('[data-rm]'); if (rmb) { D.videos = D.videos.filter(x => x.id !== rmb.dataset.rm); saveAdded(); if (S.vid === rmb.dataset.rm) S.vid = D.videos[0] && D.videos[0].id; return render(); }
+  const bub = e.target.closest('[data-vid2]'); if (bub) return select(bub.dataset.vid2, true);
   if (e.target.id === 'bstart') return runBatch();
   if (e.target.id === 'bstop') { B.stop = true; return renderBatch(); }
   if (e.target.id === 'bexport') return exportSheet();
@@ -692,6 +849,16 @@ document.getElementById('file').addEventListener('change', e => { const f = e.ta
 addEventListener('dragover', e => { e.preventDefault(); document.body.classList.add('drag'); });
 addEventListener('dragleave', e => { if (!e.relatedTarget) document.body.classList.remove('drag'); });
 addEventListener('drop', e => { e.preventDefault(); document.body.classList.remove('drag'); const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) readFile(f); });
+function applyHash() {
+  const id = HASH.get('v'); if (!id || HASH.done || !D.videos.some(v => v.id === id)) return false;
+  HASH.done = true; S.vid = id; const f = HASH.get('f'); if (f && f.includes(':')) S.filter = {k: f.slice(0, f.indexOf(':')), v: f.slice(f.indexOf(':') + 1)};
+  return true;
+}
+applyHash();
+if (API) fetch(API + '/api/featured').then(r => r.ok ? r.json() : []).then(list => {
+  let added = false; (list || []).forEach(v => { if (v && v.id && Array.isArray(v.comments) && !D.videos.some(x => x.id === v.id)) { D.videos.push(v); added = true; } });
+  if (added) { applyHash(); render(); }
+}).catch(() => {});
 if (API) fetch(API + '/api/quota').then(r => r.ok ? r.json() : null).then(q => { if (q && typeof q.limit === 'number') { S.quota = q; renderStatic(); } }).catch(() => {});
 document.getElementById('pwok').addEventListener('click', savePw);
 document.getElementById('pw').addEventListener('keydown', e => { if (e.key === 'Enter') savePw(); });
