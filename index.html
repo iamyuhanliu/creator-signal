@@ -82,6 +82,16 @@ button.rr:hover{background:rgba(255,255,255,.1)}
 .tabbar{position:sticky;top:58px;z-index:4;margin:0 -24px 14px;padding:10px 24px;background:rgba(0,0,0,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--line);scroll-margin-top:58px}
 .tabs{display:flex;gap:4px;padding:5px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid var(--line);width:max-content;max-width:100%;overflow-x:auto}
 .fd{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;background:#6e6e76;vertical-align:1px}.fd.ok{background:var(--want)}.fd.watch{background:var(--hesitant)}.fd.flag{background:var(--critical)}
+.lt{display:inline-flex;align-items:center;gap:6px;font:600 11.5px var(--sans);font-style:normal;padding:2px 9px;border-radius:999px;margin-left:8px;vertical-align:1px;background:rgba(255,255,255,.1);color:#c7c7cc;white-space:nowrap}
+.lt::before{content:"";width:7px;height:7px;border-radius:50%;background:#8e8e96}
+.lt.ok{background:rgba(46,204,138,.18);color:#7be8b8}.lt.ok::before{background:var(--want)}
+.lt.watch{background:rgba(240,170,60,.2);color:#f6c877}.lt.watch::before{background:var(--hesitant)}
+.lt.flag{background:rgba(240,90,90,.22);color:#ffa3a3}.lt.flag::before{background:var(--critical)}
+.lgd2{display:flex;gap:6px 14px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--mute);margin:0 0 12px}.lgd2 .lt{margin-left:0}
+.rr{grid-template-columns:1fr!important}
+.cmp{width:100%;border-collapse:collapse;font-size:15px}.cmp th{text-align:left;cursor:default}.cmp td{text-align:left;padding:13px 7px;vertical-align:middle}
+.cmp td.num{font:600 20px var(--sans);letter-spacing:-.01em}.cmp td.usual{color:var(--mute);font-size:16px}.cmp tbody tr{cursor:default}.cmp tbody tr:hover{background:none}
+.lead{font-size:17px;line-height:1.5;margin:0 0 14px}
 .fk{display:flex;gap:16px;align-items:center;padding:20px 22px;border-radius:18px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);margin-bottom:16px}
 .fk>i{flex:none;width:18px;height:18px;border-radius:50%;background:#8e8e96}
 .fk b{display:block;font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.25}.fk span{display:block;font-size:14px;margin-top:4px;color:#e3def5}
@@ -265,6 +275,12 @@ en:{
   chAsk:'What to ask the creator for before signing', chAskL:['Audience geography for the last 90 days. Bought traffic usually comes from places the creator does not speak to.','Traffic sources for recent videos. A large share from external or direct sources on a video with weak engagement needs an explanation.','Audience retention on two recent videos. Purchased views tend to leave within seconds.','Unique viewers and returning viewers, which are more telling than the public subscriber count.'],
   vch:'of the channel\'s usual views', vchOld:'This video is older than the channel\'s last 50 uploads, so it is compared with the channel as it is today.', v7:x=>`It reached ${x} times the channel\'s usual views.`,
   tOverview:'Overview', tAudience:'Audience', tCreator:'Fake check', tComments:'Comments',
+  lvN:{ok:'Normal', watch:'Check', flag:'Abnormal', info:'For reference', load:'Loading'}, lvLg:'What the labels mean:', lvLgT:{ok:'nothing unusual', watch:'worth a second look', flag:'outside the normal range', info:'context only, not scored'},
+  dotLg:'The dot before each name is the fake check result: green means no sign of bought subscribers or views, amber means some numbers need an explanation, red means several signs.',
+  cmpH:['', 'This video', 'Channel usually', 'How it compares'], cmpViews:'Views', cmpLike:'Likes per view', cmpCom:'Comments per view',
+  cmpLow:p=>`Only ${p} of usual`, cmpSame:p=>`About the same as usual (${p})`, cmpHigh:x=>`${x} times the usual`,
+  cmpLead:(p,hi)=>hi ? `This video was watched ${p} times as much as this creator's usual video.` : `This video was watched ${p} as much as this creator's usual video.`,
+  cmpBase:n=>`"Usually" is the median of the channel's last ${n} long videos.`, cmpTag:{low:'Below usual', same:'In line', high:'Above usual'},
   fkTitle:'Bought subscribers or views?', fk:{ok:'No sign of bought subscribers or views', watch:'Some numbers need an explanation', flag:'Several signs of bought subscribers or views', load:'Checking the channel…', info:'Channel data is not available'},
   fkSub:(n,f,w)=>`${n} checks on public data: ${f} failed, ${w} need a closer look. The creator's own analytics settle it.`, chMore:'Channel details', crTitle:'This video against the creator\'s other videos', crLoading:'Loading the creator\'s channel…', crNone:'Channel data is not available for this video.',
   qTitle:'Quotes worth using', qNote:'The most liked comment of each kind.',
@@ -369,6 +385,12 @@ zh:{
   chAsk:'签约前建议向创作者要的数据', chAskL:['近 90 天的观众地区分布。买来的流量通常来自创作者并不面向的地区。','近期视频的流量来源。互动很弱的视频如果外部或直接来源占比很高，需要对方解释。','两条近期视频的观众留存曲线。买来的播放往往几秒内就离开。','独立观众数和回访观众数，它们比公开的粉丝数更说明问题。'],
   vch:'相当于频道平时播放量的倍数', vchOld:'这条视频不在频道最近 50 条上传之内，这里是和频道现在的水平比较。', v7:x=>`播放量是该频道平时水平的 ${x} 倍。`,
   tOverview:'概览', tAudience:'观众', tCreator:'买粉检测', tComments:'评论',
+  lvN:{ok:'正常', watch:'留意', flag:'异常', info:'仅供参考', load:'加载中'}, lvLg:'标签含义：', lvLgT:{ok:'没有发现问题', watch:'值得多看一眼', flag:'超出正常范围', info:'只是背景信息，不计入判断'},
+  dotLg:'名字前的圆点是买粉检测的结果：绿色表示没有发现买粉或买量的迹象，黄色表示有数据需要对方解释，红色表示多处迹象异常。',
+  cmpH:['', '这条视频', '频道平时', '对比结果'], cmpViews:'播放量', cmpLike:'点赞率（点赞/播放）', cmpCom:'评论率（评论/播放）',
+  cmpLow:p=>`只有平时的 ${p}`, cmpSame:p=>`和平时差不多（平时的 ${p}）`, cmpHigh:x=>`是平时的 ${x} 倍`,
+  cmpLead:(p,hi)=>hi ? `这条视频的播放量是这位创作者平时视频的 ${p} 倍。` : `这条视频的播放量只有这位创作者平时视频的 ${p}。`,
+  cmpBase:n=>`"频道平时"指该频道最近 ${n} 条长视频的中位数。`, cmpTag:{low:'低于平时', same:'正常水平', high:'高于平时'},
   fkTitle:'有没有买粉买量', fk:{ok:'没有发现买粉或买量的迹象', watch:'有数据需要对方解释', flag:'多处迹象指向买粉或买量', load:'正在检查频道…', info:'暂时拿不到频道数据'},
   fkSub:(n,f,w)=>`基于公开数据的 ${n} 项检查：${f} 项异常，${w} 项需要留意。最终以创作者后台数据为准。`, chMore:'频道详情', crTitle:'这条视频和创作者其他视频比', crLoading:'正在加载创作者的频道数据…', crNone:'这条视频暂时拿不到频道数据。',
   qTitle:'值得引用的评论', qNote:'每一类里点赞最多的那条。',
@@ -619,7 +641,9 @@ function fakeCheck(v) {
   return fkLevel(rows);
 }
 const fkHead = k => `<div class="fk ${k.lv}"><i></i><div><b>${T.fk[k.lv]}</b>${k.rows.length ? `<span>${T.fkSub(k.n, k.f, k.w)}</span>` : ''}</div></div>`;
-const fkRows = rows => `<div class="rk">${rows.map(x => `<div class="rr"><i class="lv ${x.lv}"></i><div><b>${x.label}</b><span>${x.value}</span></div></div>`).join('')}</div>`;
+const lvTag = lv => `<em class="lt ${lv}">${T.lvN[lv] || ''}</em>`;
+const lvLegend = () => `<div class="lgd2"><span>${T.lvLg}</span>${['ok', 'watch', 'flag', 'info'].map(k => `<span>${lvTag(k)} ${T.lvLgT[k]}</span>`).join('')}</div>`;
+const fkRows = rows => lvLegend() + `<div class="rk">${rows.map(x => `<div class="rr"><div><b>${x.label}${lvTag(x.lv)}</b><span>${x.value}</span></div></div>`).join('')}</div>`;
 function channelHTML(ch, standalone) {
   const st = chStats(ch), n = st.L.length;
   const k = fkLevel(chSignals(ch, st).slice(0, 6));
@@ -752,6 +776,8 @@ function renderCompare() {
   let port = document.getElementById('port'); if (!port) { port = document.createElement('div'); port.id = 'port'; port.className = 'port'; document.querySelector('#compare .hrow').after(port); }
   const all = sorted(), tv = all.reduce((a, x) => a + (x.v.views || 0), 0), fv = all.filter(x => !isNaN(fee(x.v))), tf = fv.reduce((a, x) => a + fee(x.v), 0), fviews = fv.reduce((a, x) => a + (x.v.views || 0), 0);
   port.innerHTML = all.length ? T.port(all.length, big(tv), pct(median(all.map(x => x.m.intent))), fv.length && fviews ? (tf / fviews * 1000).toFixed(2) : '') : '';
+  let dl = document.getElementById('dotlg'); if (!dl) { dl = document.createElement('div'); dl.id = 'dotlg'; dl.className = 'note'; document.querySelector('#compare .scroll').after(dl); }
+  dl.innerHTML = API ? `<i class="fd ok"></i><i class="fd watch"></i><i class="fd flag"></i>${T.dotLg}` : '';
   let fit = document.getElementById('fit'); if (!fit) { fit = document.createElement('div'); fit.id = 'fit'; document.getElementById('compare').appendChild(fit); }
   fit.innerHTML = fitMap();
 }
@@ -811,13 +837,17 @@ function renderDetail() {
     (m.comps.length ? `<div class="chips">` + m.comps.slice(0, 8).map(([name, n]) => `<button class="chip" data-f="c:${esc(name)}">${esc(name)} · ${n}</button>`).join('') + `</div>` : '') + `</div>`;
   const fk = fakeCheck(v); if (CHFULL[v.id] === undefined) ensureChannel(v);
   P.creator += `<div class="card key"><h2>${T.fkTitle}</h2>${fkHead(fk)}${fk.rows.length ? fkRows(fk.rows) + `<div class="note">${T.chNote} ${T.chNoAi}</div>` : ''}</div>`;
-  P.creator += `<div class="card"><h2>${T.crTitle}</h2><div class="health">
-      <div><b>${isNaN(m.viewsPerSub) ? 'n/a' : m.viewsPerSub.toFixed(2) + 'x'}</b><span>${T.vps}</span></div>
-      <div><b>${pct(m.likeRate, 2)}</b><span>${T.lpv}</span></div>
-      <div><b>${pct(m.commentRate, 3)}</b><span>${T.cpv}</span></div>
-      <div><b>${isNaN(vsCh(v)) ? 'n/a' : vsCh(v).toFixed(2) + 'x'}</b><span>${T.vch}</span></div></div>${CHM[v.id] && !CHM[v.id].inS ? `<div class="note">${T.vchOld}</div>` : ''}</div>`;
-  P.creator += `<div class="card"><h2>${T.rTitle}</h2><div class="rk">` +
-    risk(v, m).map(x => { const inner = `<i class="lv ${x.lv}"></i><div><b>${x.label}</b><span>${x.value}</span></div>`; return x.f ? `<button class="rr" data-f="${x.f}">${inner}</button>` : `<div class="rr">${inner}</div>`; }).join('') +
+  const chF = CHFULL[v.id];
+  if (chF && chF !== 'loading') {
+    const st = chStats(chF), r0 = v.views / st.med, say = r => isNaN(r) || !isFinite(r) ? ['info', 'n/a', ''] : r < .7 ? ['watch', T.cmpLow(pct(r)), T.cmpTag.low] : r > 1.3 ? ['ok', T.cmpHigh(r.toFixed(1)), T.cmpTag.high] : ['info', T.cmpSame(pct(r)), T.cmpTag.same];
+    const rows = [[T.cmpViews, big(v.views), big(Math.round(st.med)), r0], [T.cmpLike, pct(m.likeRate, 2), pct(st.medLike, 2), m.likeRate / st.medLike], [T.cmpCom, pct(m.commentRate, 3), pct(st.medCom, 3), m.commentRate / st.medCom]];
+    P.creator += `<div class="card"><h2>${T.crTitle}</h2><p class="lead">${isNaN(r0) ? '' : T.cmpLead(r0 > 1.3 ? r0.toFixed(1) : pct(r0), r0 > 1.3)}</p>
+      <div class="scroll"><table class="cmp"><thead><tr>${T.cmpH.map(x => '<th>' + x + '</th>').join('')}</tr></thead><tbody>` +
+      rows.map(([name, a, b, r]) => { const [lv, text, tag] = say(r); return `<tr><td>${name}</td><td class="num">${a}</td><td class="usual">${b}</td><td>${text}${tag ? `<em class="lt ${lv}">${tag}</em>` : ''}</td></tr>`; }).join('') +
+      `</tbody></table></div><div class="note">${T.cmpBase(st.L.length)}${CHM[v.id] && !CHM[v.id].inS ? ' ' + T.vchOld : ''}</div></div>`;
+  }
+  P.creator += `<div class="card"><h2>${T.rTitle}</h2>${lvLegend()}<div class="rk">` +
+    risk(v, m).map(x => { const inner = `<div><b>${x.label}${lvTag(x.lv)}</b><span>${x.value}</span></div>`; return x.f ? `<button class="rr" data-f="${x.f}">${inner}</button>` : `<div class="rr">${inner}</div>`; }).join('') +
     `</div><div class="note">${T.rNote} <a href="https://www.google.com/search?tbm=nws&q=${encodeURIComponent('"' + v.channel + '"')}" target="_blank" rel="noopener">${esc(T.rNews(v.channel))}</a></div></div>`;
   const full = CHFULL[v.id];
   if (full && full !== 'loading') P.creator += channelHTML(full, false);
