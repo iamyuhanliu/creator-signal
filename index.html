@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Creator Signal</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23000'/%3E%3Crect x='32' y='13' width='19' height='19' fill='%23fff'/%3E%3Crect x='13' y='32' width='19' height='19' fill='%23fff'/%3E%3C/svg%3E">
 <style>
 :root{--bg:#000;--card:rgba(22,22,25,.88);--ink:#f5f5f7;--mute:#aeaeb6;--line:rgba(255,255,255,.13);--accent:#f5f5f7;--accent-soft:rgba(255,255,255,.1);
 --want:#2ecc8a;--hesitant:#f0aa3c;--critical:#f05a5a;--unclear:#7d8aa0;--offtopic:rgba(255,255,255,.14);--radius:22px;
@@ -69,6 +70,9 @@ button.rr:hover{background:rgba(255,255,255,.1)}
 .rr .lv{width:10px;height:10px;border-radius:50%;margin-top:6px;background:#6e6e76}.rr .lv.ok{background:var(--want)}.rr .lv.watch{background:var(--hesitant)}.rr .lv.flag{background:var(--critical)}
 .rr b{display:block;font-weight:600;font-size:14.5px}.rr span{font-size:13.5px;color:var(--mute)}
 .note{font-size:13px;color:var(--mute);margin-top:12px}
+.ai{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--mute);margin-top:12px}.ai b{flex:none;font:600 10.5px var(--mono);letter-spacing:.06em;color:#000;background:#d1d1d6;border-radius:5px;padding:2px 6px;margin-top:1px}
+.cm p.zh,.q p.zh{color:#c7c7cc;font-size:14.5px;border-left:2px solid rgba(255,255,255,.2);padding-left:10px}
+.fit .ql{font:500 10.5px var(--mono);letter-spacing:.05em;fill:#7a7a82}
 .port{display:flex;gap:22px;flex-wrap:wrap;font-size:14px;color:var(--mute);margin:-4px 0 14px}.port b{color:var(--ink);font-weight:600}
 .qs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}@media(max-width:820px){.qs{grid-template-columns:1fr}}
 .q{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
@@ -219,8 +223,8 @@ en:{
   port:(n,views,med,cpm)=>`<span><b>${n}</b> videos</span><span><b>${views}</b> total views</span><span>median want to play <b>${med}</b></span>` + (cpm ? `<span>blended CPM <b>$${cpm}</b></span>` : ''),
   roadTitle:'On the roadmap', road:['TikTok, Twitch and Instagram through the reserved platform adapter, once the data source has had a legal review.','Creator vetting from the open web: recent news and forum threads about a creator, listed with their sources and no verdict.','One-click translation of comments.','A one page PDF report per creator.'],
   nextTitle:'Suggested next brief', nextNote:'Generated from the numbers above by fixed rules, as a starting point for discussion.',
-  nb:{low:p=>`Only ${p} of comments are about the game. Ask for the game to drive the premise of the next video, or treat this creator as reach rather than conversion.`,
-    fit:'The audience talks about the game and wants it. Rebook this creator, and reuse the strongest comments as social proof.',
+  nb:{low:p=>`${p} of comments are about the game. If the goal was awareness, that can be fine. If it was conversion, ask for the game to drive the premise of the next video.`,
+    fit:'Viewers talk about the game and many say they want it. On this evidence the creator is worth considering for a repeat, and the strongest comments can serve as social proof.',
     comp:(p,c)=>`${p} of commenters reveal they play ${c}. Brief a direct comparison: what this game does that ${c} does not.`,
     hes:p=>`${p} of interested viewers are waiting on something. A follow-up video after the next update or price change could convert them.`,
     ad:n=>`${n} comments push back on the sponsorship. Let the creator keep their usual format and state the sponsorship early and plainly.`,
@@ -231,12 +235,14 @@ en:{
   rCv:'Controversy about the creator', rAd:'Sponsorship pushback', rAdV:(d,n)=>`${d} dislike it, ${n} mention it`, rDis:'Disclosure', rDisOk:'Paid promotion is declared to YouTube', rDisBad:'Viewers mention a sponsorship, but no paid promotion is declared', rDisNone:'No sponsorship detected',
   rDup:'Repeated comments', rLow:'Very short comments', rShare:(n,p)=>`${n} comments, ${p}`, rNews:c=>`Search recent news about ${c}`, rBadge:n=>`${n} risk signal${n === 1 ? '' : 's'} flagged`,
   fDup:'Repeated comments', fLow:'Very short comments', fLb:(l,b)=>`${l} · ${b}`,
-  fitTitle:'Fit map', fitX:'Share of comments about the game', fitY:'Want to play', fitNote:'Bubble size is views. Click a bubble to open that video.',
-  fitQ:['Small but keen','Converts','Reach only','Talks, not convinced'],
+  fitTitle:'Fit map', fitX:'Share of comments about the game', fitY:'Want to play', fitNote:'Each bubble is one video and its size is views. The dashed lines are the medians of the videos shown, so positions are relative to this set, not to an industry benchmark. Click a bubble to open that video.',
+  fitQ:['Less game talk, keener','More game talk, keener','Less game talk, less keen','More game talk, less keen'], fitMed:'median',
+  ai:m=>`Analysed by an AI model (${m}). Individual labels can be wrong, so open the comments behind a number before you rely on it.`,
+  trBtn:'Translate these comments', trBusy:'Translating…', trFail:'Translation failed. Try again in a moment.',
   vsMed:d=>`${d >= 0 ? '+' : ''}${d} pts vs median`, copyLink:'Copy link', copied:'Copied', copyQuote:'Copy quote', remove:'Remove from this list',
   exportTable:'Export table', exportComments:'Export these comments', feePh:'add',
   vLabel:'In one line',
-  v1:p=>`The audience came for the creator: only ${p} of comments are about the game.`,
+  v1:p=>`Most comments are about the creator or the video itself; ${p} are about the game. That is common on entertainment-led channels.`,
   v2:(r,i,h)=>`${r} of comments are about the game. Of those, ${i} want to play and ${h} are interested but hesitant.`,
   v3:(p,c)=>`${p} of commenters reveal they play a competing game, most often ${c}.`,
   v4:(b,n)=>`The most common barrier is "${b}" (${n} comments).`,
@@ -300,8 +306,8 @@ zh:{
   port:(n,views,med,cpm)=>`<span><b>${n}</b> 条视频</span><span>总播放 <b>${views}</b></span><span>想玩占比中位数 <b>${med}</b></span>` + (cpm ? `<span>综合 CPM <b>$${cpm}</b></span>` : ''),
   roadTitle:'后续计划', road:['通过预留的平台接口接入 TikTok、Twitch 和 Instagram，前提是数据来源通过法务确认。','全网创作者背调：列出关于创作者的近期新闻和论坛讨论，只给来源，不下结论。','评论一键翻译。','每位创作者导出一页 PDF 报告。'],
   nextTitle:'下一份 brief 的建议', nextNote:'由上面的数字按固定规则生成，用作讨论的起点。',
-  nb:{low:p=>`只有 ${p} 的评论聊到游戏。下一条视频可以要求让游戏成为视频的主线，或者把这位创作者当作曝光渠道而不是转化渠道。`,
-    fit:'观众在聊游戏，而且想玩。可以复投这位创作者，并把最有力的评论拿来做口碑素材。',
+  nb:{low:p=>`聊到游戏的评论占 ${p}。如果目标是曝光，这未必是问题；如果目标是转化，下一条视频可以要求让游戏成为视频的主线。`,
+    fit:'观众在聊游戏，其中不少人表示想玩。就这些评论来看，这位创作者值得考虑复投，最有力的评论可以拿来做口碑素材。',
     comp:(p,c)=>`${p} 的评论者透露自己在玩 ${c}。可以在 brief 里要求做正面对比：这款游戏有哪些 ${c} 没有的东西。`,
     hes:p=>`${p} 的感兴趣观众在等某件事。下次更新或调价之后再投一条跟进视频，有机会转化他们。`,
     ad:n=>`有 ${n} 条评论反感赞助。让创作者保持自己平时的风格，并且尽早、明确地说明是赞助内容。`,
@@ -312,12 +318,14 @@ zh:{
   rCv:'关于创作者本人的争议', rAd:'赞助引起的反感', rAdV:(d,n)=>`${d} 条反感，${n} 条提到`, rDis:'赞助声明', rDisOk:'已向 YouTube 声明付费推广', rDisBad:'观众提到了赞助，但视频没有声明付费推广', rDisNone:'没有发现赞助迹象',
   rDup:'重复评论', rLow:'极短评论', rShare:(n,p)=>`${n} 条，占 ${p}`, rNews:c=>`搜索 ${c} 的近期新闻`, rBadge:n=>`有 ${n} 项风险信号`,
   fDup:'重复评论', fLow:'极短评论', fLb:(l,b)=>`${l} · ${b}`,
-  fitTitle:'匹配度地图', fitX:'聊到游戏的评论占比', fitY:'想玩占比', fitNote:'圆圈大小代表播放量。点圆圈可以打开对应视频。',
-  fitQ:['量小但意愿强','能转化','只有曝光','有讨论但没被说服'],
+  fitTitle:'匹配度地图', fitX:'聊到游戏的评论占比', fitY:'想玩占比', fitNote:'每个圆圈是一条视频，大小代表播放量。虚线是当前这批视频的中位数，所以位置是相对这批视频而言，不是行业基准。点圆圈可以打开对应视频。',
+  fitQ:['聊得少，意愿高','聊得多，意愿高','聊得少，意愿低','聊得多，意愿低'], fitMed:'中位数',
+  ai:m=>`以上结果由 AI 模型（${m}）分析生成，单条判断可能出错。引用某个数字前，请先点开看它背后的评论。`,
+  trBtn:'把这些评论翻译成中文', trBusy:'翻译中…', trFail:'翻译失败，请稍后再试。',
   vsMed:d=>`比中位数${d >= 0 ? '高' : '低'} ${Math.abs(d)} 个百分点`, copyLink:'复制链接', copied:'已复制', copyQuote:'复制这条评论', remove:'从列表中移除',
   exportTable:'导出表格', exportComments:'导出这些评论', feePh:'填写',
   vLabel:'一句话结论',
-  v1:p=>`观众是冲着创作者来的：只有 ${p} 的评论聊到游戏。`,
+  v1:p=>`多数评论在聊创作者或视频本身，聊到游戏的占 ${p}。娱乐向频道通常如此。`,
   v2:(r,i,h)=>`${r} 的评论聊到游戏。其中 ${i} 想玩，${h} 感兴趣但犹豫。`,
   v3:(p,c)=>`${p} 的评论者透露自己在玩竞品，提到最多的是 ${c}。`,
   v4:(b,n)=>`最常见的门槛是「${b}」（${n} 条评论）。`,
@@ -428,19 +436,34 @@ function vsMedian(key, val) {
   return isNaN(md) ? '' : ' · ' + T.vsMed(d);
 }
 function fitMap() {
-  if (D.videos.length < 3) return '';
-  const W = 720, H = 300, L = 52, R = 16, Tp = 16, Bt = 40, pw = W - L - R, ph = H - Tp - Bt, pts = D.videos.map(v => ({v, m: metrics(v, S.weighted)})).filter(p => !isNaN(p.m.intent));
-  const mx = Math.max(...pts.map(p => p.v.views || 1)), X = x => L + x * pw, Y = y => Tp + (1 - y) * ph;
-  let g = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${T.fitTitle}">`;
-  [0, .25, .5, .75, 1].forEach(t => { g += `<line x1="${X(t)}" y1="${Tp}" x2="${X(t)}" y2="${Tp + ph}" stroke="rgba(255,255,255,${t === .5 ? .22 : .07})"/><line x1="${L}" y1="${Y(t)}" x2="${L + pw}" y2="${Y(t)}" stroke="rgba(255,255,255,${t === .5 ? .22 : .07})"/>` +
-    `<text x="${X(t)}" y="${H - 22}" fill="#aeaeb6" font-size="11" text-anchor="middle">${t * 100}%</text><text x="${L - 8}" y="${Y(t) + 4}" fill="#aeaeb6" font-size="11" text-anchor="end">${t * 100}%</text>`; });
-  [[X(0) + 8, Tp + 14, 'start', 0], [X(1) - 8, Tp + 14, 'end', 1], [X(0) + 8, Tp + ph - 8, 'start', 2], [X(1) - 8, Tp + ph - 8, 'end', 3]].forEach(([x, y, a, i]) => { g += `<text x="${x}" y="${y}" fill="#6e6e76" font-size="11" text-anchor="${a}">${T.fitQ[i]}</text>`; });
-  g += `<text x="${L + pw / 2}" y="${H - 4}" fill="#aeaeb6" font-size="11.5" text-anchor="middle">${T.fitX}</text><text transform="translate(13 ${Tp + ph / 2}) rotate(-90)" fill="#aeaeb6" font-size="11.5" text-anchor="middle">${T.fitY}</text>`;
-  pts.sort((a, b) => (b.v.views || 0) - (a.v.views || 0)).forEach(p => {
-    const r = 6 + 18 * Math.sqrt((p.v.views || 1) / mx), x = X(Math.min(1, p.m.relevance)), y = Y(Math.min(1, p.m.intent)), on = p.v.id === S.vid, left = x > L + pw * .7;
-    g += `<circle data-vid2="${p.v.id}" cx="${x}" cy="${y}" r="${r}" fill="rgba(245,245,247,${on ? .55 : .16})" stroke="#f5f5f7" stroke-width="${on ? 2 : 1}"><title>${esc(p.v.channel)}</title></circle>` +
-      `<text x="${left ? x - r - 5 : x + r + 5}" y="${y + 4}" fill="#f5f5f7" font-size="12" text-anchor="${left ? 'end' : 'start'}" pointer-events="none">${esc(p.v.channel)}</text>`;
+  const pts = D.videos.map(v => ({v, m: metrics(v, S.weighted)})).filter(p => !isNaN(p.m.intent) && !isNaN(p.m.relevance));
+  if (pts.length < 3) return '';
+  const W = 780, H = 410, L = 58, R = 74, Tp = 34, Bt = 50, pw = W - L - R, ph = H - Tp - Bt, xs = pts.map(p => p.m.relevance), ys = pts.map(p => p.m.intent);
+  const dom = a => { let lo = Math.min(...a), hi = Math.max(...a); const pad = Math.max(.1, (hi - lo) * .25); lo = Math.max(0, Math.floor((lo - pad) * 10) / 10); hi = Math.min(1, Math.ceil((hi + pad) * 10) / 10); if (hi - lo < .3) { lo = Math.max(0, lo - .1); hi = Math.min(1, hi + .1); } return [lo, hi]; };
+  const [x0, x1] = dom(xs), [y0, y1] = dom(ys), X = x => L + (x - x0) / (x1 - x0) * pw, Y = y => Tp + (1 - (y - y0) / (y1 - y0)) * ph, mx = median(xs), my = median(ys), mv = Math.max(...pts.map(p => p.v.views || 1));
+  let g = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${T.fitTitle}"><rect x="${L}" y="${Tp}" width="${pw}" height="${ph}" rx="10" fill="rgba(255,255,255,.025)" stroke="rgba(255,255,255,.12)"/>`;
+  for (let k = 0; k <= 4; k++) {
+    const tx = x0 + (x1 - x0) * k / 4, ty = y0 + (y1 - y0) * k / 4;
+    if (k > 0 && k < 4) g += `<line x1="${X(tx)}" y1="${Tp}" x2="${X(tx)}" y2="${Tp + ph}" stroke="rgba(255,255,255,.05)"/><line x1="${L}" y1="${Y(ty)}" x2="${L + pw}" y2="${Y(ty)}" stroke="rgba(255,255,255,.05)"/>`;
+    g += `<text x="${X(tx)}" y="${Tp + ph + 18}" fill="#aeaeb6" font-size="11.5" text-anchor="middle">${Math.round(tx * 100)}%</text><text x="${L - 10}" y="${Y(ty) + 4}" fill="#aeaeb6" font-size="11.5" text-anchor="end">${Math.round(ty * 100)}%</text>`;
+  }
+  g += `<line x1="${X(mx)}" y1="${Tp}" x2="${X(mx)}" y2="${Tp + ph}" stroke="rgba(255,255,255,.4)" stroke-dasharray="4 5"/><line x1="${L}" y1="${Y(my)}" x2="${L + pw}" y2="${Y(my)}" stroke="rgba(255,255,255,.4)" stroke-dasharray="4 5"/>` +
+    `<text class="ql" x="${X(mx)}" y="${Tp - 10}" text-anchor="middle">${T.fitMed} ${pct(mx)}</text><text class="ql" x="${L + pw + 8}" y="${Y(my) - 2}">${T.fitMed}</text><text class="ql" x="${L + pw + 8}" y="${Y(my) + 12}">${pct(my)}</text>`;
+  [[L + 12, Tp + 20, 'start', 0], [L + pw - 12, Tp + 20, 'end', 1], [L + 12, Tp + ph - 12, 'start', 2], [L + pw - 12, Tp + ph - 12, 'end', 3]].forEach(([x, y, a, i]) => { g += `<text class="ql" x="${x}" y="${y}" text-anchor="${a}" style="paint-order:stroke;stroke:#161618;stroke-width:6px">${T.fitQ[i]}</text>`; });
+  g += `<text x="${L + pw / 2}" y="${H - 8}" fill="#d1d1d6" font-size="12.5" text-anchor="middle">${T.fitX}</text><text transform="translate(15 ${Tp + ph / 2}) rotate(-90)" fill="#d1d1d6" font-size="12.5" text-anchor="middle">${T.fitY}</text>`;
+  // 先定圆圈位置，再给每个名字找一个不压住别的圆圈和名字的位置
+  const nodes = pts.sort((a, b) => (b.v.views || 0) - (a.v.views || 0)).map(p => ({p, x: X(p.m.relevance), y: Y(p.m.intent), r: 7 + 16 * Math.sqrt((p.v.views || 1) / mv), w: 7.1 * p.v.channel.length + 4}));
+  const boxes = nodes.map(n => [n.x - n.r, n.y - n.r, n.x + n.r, n.y + n.r]), hit = (a, b) => a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1];
+  nodes.forEach((n, i) => {
+    const c = [[n.x + n.r + 7, n.y - 8, 'start'], [n.x - n.r - 7 - n.w, n.y - 8, 'start'], [n.x - n.w / 2, n.y - n.r - 22, 'start'], [n.x - n.w / 2, n.y + n.r + 6, 'start'], [n.x + n.r + 5, n.y - n.r - 16, 'start'], [n.x - n.r - 5 - n.w, n.y + n.r, 'start']];
+    let best = c[0];
+    for (const k of c) { const b = [k[0], k[1], k[0] + n.w, k[1] + 16]; if (b[0] >= L + 2 && b[2] <= L + pw - 2 && b[1] >= Tp + 2 && b[3] <= Tp + ph - 2 && !boxes.some((o, j) => j !== i && hit(b, o))) { best = k; break; } }
+    n.lx = best[0]; n.ly = best[1] + 12; boxes.push([best[0], best[1], best[0] + n.w, best[1] + 16]);
   });
+  nodes.forEach(n => { const on = n.p.v.id === S.vid;
+    g += `<circle data-vid2="${n.p.v.id}" cx="${n.x}" cy="${n.y}" r="${n.r}" fill="rgba(245,245,247,${on ? .92 : .2})" stroke="#f5f5f7" stroke-width="${on ? 0 : 1.2}"><title>${esc(n.p.v.channel)}: ${pct(n.p.m.relevance)} / ${pct(n.p.m.intent)}</title></circle>`; });
+  nodes.forEach(n => { const on = n.p.v.id === S.vid;
+    g += `<text data-vid2="${n.p.v.id}" x="${n.lx}" y="${n.ly}" fill="#f5f5f7" font-size="12.5" font-weight="${on ? 700 : 500}" style="cursor:pointer;paint-order:stroke;stroke:#141416;stroke-width:4px">${esc(n.p.v.channel)}</text>`; });
   return `<div class="fit"><h2>${T.fitTitle}</h2>${g}</svg><div class="note">${T.fitNote}</div></div>`;
 }
 function shareUrl() {
@@ -451,6 +474,20 @@ function copyText(text, btn) {
   const done = () => { if (btn) { const o = btn.textContent; btn.textContent = T.copied; setTimeout(() => { btn.textContent = o; }, 1400); } };
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, () => {});
   else { const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (e) {} ta.remove(); }
+}
+async function translateShown() {
+  if (S.trBusy) return;
+  const v = D.videos.find(x => x.id === S.vid); if (!v) return;
+  const qs = ['want', 'hesitant', 'critical'].map(a => v.comments.filter(c => c.a === a && c.t.length >= 25).sort((x, y) => y.k - x.k)[0]).filter(Boolean);
+  const todo = [...new Set(qs.concat(currentList().slice(0, S.limit)))].filter(c => !c._zh).slice(0, 40); if (!todo.length) return;
+  S.trBusy = true; S.trErr = false; renderDetail();
+  try {
+    const r = await fetch(API + '/api/translate', {method:'POST', headers: PW ? {'content-type':'application/json', Authorization:'Bearer ' + PW} : {'content-type':'application/json'}, body: JSON.stringify({texts: todo.map(c => c.t)})});
+    const j = await r.json(); if (!r.ok || !Array.isArray(j.translations) || j.translations.length !== todo.length) throw new Error('bad');
+    todo.forEach((c, i) => { c._zh = j.translations[i]; }); if (v.live) saveAdded();
+  } catch (e) { S.trErr = true; }
+  S.trBusy = false; renderDetail();
+  fetch(API + '/api/quota').then(r => r.ok ? r.json() : null).then(q => { if (q && typeof q.limit === 'number') { S.quota = q; renderStatic(); } }).catch(() => {});
 }
 function download(name, rows) {
   const csv = '\ufeff' + rows.map(r => r.map(x => '"' + String(x == null ? '' : x).replace(/"/g, '""') + '"').join(',')).join('\r\n');
@@ -571,6 +608,7 @@ function renderDetail() {
     </div>
     <div class="acts"><label class="toggle"><input type="checkbox" id="wt" ${S.weighted ? 'checked' : ''}> ${T.weight}</label><button class="ghost" id="share">${T.copyLink}</button></div></div>
     <div class="verdict"><span>${T.vLabel}</span>${esc(verdict(v, m))}</div>
+    <div class="ai"><b>AI</b><span>${T.ai(esc(v.model || D.model || 'Claude'))}</span></div>
     <div class="tiles">
       ${tile(T.kRel, pct(m.relevance), T.ofAll(m.nRel, m.n) + vsMedian('relevance', m.relevance), 'related:1', false, T.tip.rel)}
       ${tile(T.kWant, pct(m.intent), T.ofRel(m.att.want.n, m.nRel) + vsMedian('intent', m.intent), 'a:want', false, T.tip.want)}
@@ -582,7 +620,7 @@ function renderDetail() {
   const nb = brief(v, m);
   if (nb.length) h += `<div class="card"><h2>${T.nextTitle}</h2><ul class="nb">${nb.map(x => '<li>' + esc(x) + '</li>').join('')}</ul><div class="note">${T.nextNote}</div></div>`;
   const qs = ['want', 'hesitant', 'critical'].map(a => v.comments.filter(c => c.a === a && c.t.length >= 25).sort((x, y) => y.k - x.k)[0]).filter(Boolean);
-  if (qs.length) h += `<div class="card"><h2>${T.qTitle}</h2><div class="qs">` + qs.map(c => `<div class="q"><p>${highlight(c.t, c.ev)}</p><div class="tags"><span class="tag ${c.a}">${T.a[c.a]}</span><span>${c.k.toLocaleString()} ${T.likes}</span><button class="cp" data-cp="${esc(c.t)}">${T.copyQuote}</button></div></div>`).join('') + `</div><div class="note">${T.qNote}</div></div>`;
+  if (qs.length) h += `<div class="card"><h2>${T.qTitle}</h2><div class="qs">` + qs.map(c => `<div class="q"><p>${highlight(c.t, c.ev)}</p>${lang === 'zh' && c._zh ? `<p class="zh">${esc(c._zh)}</p>` : ''}<div class="tags"><span class="tag ${c.a}">${T.a[c.a]}</span><span>${c.k.toLocaleString()} ${T.likes}</span><button class="cp" data-cp="${esc(c.t)}">${T.copyQuote}</button></div></div>`).join('') + `</div><div class="note">${T.qNote}</div></div>`;
   h += `<div class="grid"><div class="card"><h2>${T.stance}</h2><div class="stack">` +
     ORDER.map(a => m.att[a].w ? `<button data-f="a:${a}" title="${T.a[a]}" style="width:${m.att[a].w / m.all * 100}%;background:${COLOR[a]}"></button>` : '').join('') +
     `</div><div class="legend">` +
@@ -613,10 +651,10 @@ function renderDetail() {
     `</div><div class="note">${T.rNote} <a href="https://www.google.com/search?tbm=nws&q=${encodeURIComponent('"' + v.channel + '"')}" target="_blank" rel="noopener">${esc(T.rNews(v.channel))}</a></div></div>`;
   const list = currentList();
   h += `<div class="card" id="comments"><div class="hrow"><h2>${T.behind}</h2><button class="ghost" id="csv2">${T.exportComments}</button></div>
-    <div class="row"><input type="text" id="q" placeholder="${T.search}" value="${esc(S.q)}"></div>
+    <div class="row"><input type="text" id="q" placeholder="${T.search}" value="${esc(S.q)}">${lang === 'zh' && window.CS_TRANSLATE && API ? `<button class="ghost" id="tr" ${S.trBusy ? 'disabled' : ''}>${S.trBusy ? T.trBusy : T.trBtn}</button>` : ''}</div>${S.trErr ? `<div class="note">${T.trFail}</div>` : ''}
     <div class="chips"><button class="chip ${S.filter ? '' : 'on'}" data-f="">${T.all} · ${v.comments.length}</button>` +
     (S.filter ? `<button class="chip on" data-f="">${esc(filterName(S.filter))} · ${list.length} ✕</button>` : '') + `</div>` +
-    (list.length ? list.slice(0, S.limit).map(c => `<div class="cm"><p>${highlight(c.t, c.ev)}</p><div class="tags">
+    (list.length ? list.slice(0, S.limit).map(c => `<div class="cm"><p>${highlight(c.t, c.ev)}</p>${lang === 'zh' && c._zh ? `<p class="zh">${esc(c._zh)}</p>` : ''}<div class="tags">
         <span class="tag ${c.a}">${T.a[c.a] || esc(c.a)}</span>` +
         [c.b1, c.b2].filter(b => b && b !== 'none').map(b => `<span class="tag">${T.b[b] || esc(b)}</span>`).join('') +
         (c.l && c.l !== 'unknown' ? `<span class="tag">${T.l[c.l] || esc(c.l)}${c.c ? ': ' + esc(c.c) : ''}</span>` : '') +
@@ -635,6 +673,7 @@ function select(id, scroll) { S.vid = id; S.filter = null; S.q = ''; S.limit = 3
 
 document.addEventListener('click', e => {
   if (e.target.closest('input.fee')) return;
+  if (e.target.id === 'tr') return translateShown();
   if (e.target.id === 'share') return copyText(shareUrl(), e.target);
   const cpb = e.target.closest('[data-cp]'); if (cpb) { const v = D.videos.find(x => x.id === S.vid); return copyText('"' + cpb.dataset.cp + '" (comment on ' + (v ? v.channel + ', ' : '') + 'youtu.be/' + S.vid + ')', cpb); }
   const rmb = e.target.closest('[data-rm]'); if (rmb) { D.videos = D.videos.filter(x => x.id !== rmb.dataset.rm); saveAdded(); if (S.vid === rmb.dataset.rm) S.vid = D.videos[0] && D.videos[0].id; return render(); }

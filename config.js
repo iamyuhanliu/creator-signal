@@ -1,4 +1,4 @@
-// 后端地址。部署好 Cloudflare Worker 后，把它的网址填进引号里，例如：
-// window.CS_API = "https://creator-signal.你的名字.workers.dev";
-// 留空表示还没接通，网站只展示已经分析好的样本。
+// 后端地址。留空表示没接通，网站只展示已经分析好的样本。
 window.CS_API = "https://creator-signal.iamyuhanliu.workers.dev";
+// 评论翻译成中文的按钮（只在中文界面出现）。面试展示前想去掉，把 true 改成 false 即可。
+window.CS_TRANSLATE = true;
