@@ -16,7 +16,7 @@
 // 给模型的说明，和 labels.py 里的 PROMPT 保持一致
 const PROMPT = "You label YouTube comments left under a SPONSORED video about a video game.\nJudge only from the comment text and the video context given.\n\nReturn ONLY a JSON array. Each element is itself an array of exactly 10 values, in this order:\n[i, attitude, barrier1, barrier2, layer, competitor, ad, controversy, evidence, conf]\n\nattitude = stance toward THE GAME (not the creator):\n- \"want\": wants to play or buy, already plays and is positive, OR clearly praises the game itself (its features, look, setting, details) even without saying \"I will buy\".\n- \"hesitant\": interested but states a condition, wish, worry or reason for waiting.\n- \"critical\": negative or sceptical about the game itself.\n- \"offtopic\": about the creator, a joke, a meme, a timestamp, the video being funny. Praise for the creator or the video alone is offtopic.\n- \"unclear\": talks about the game (a neutral fact, a question, a comparison) but shows no stance.\nIf a comment both praises and lists wishes, use \"want\" when the praise dominates and nothing is stated as a condition; use \"hesitant\" when buying or liking \"depends on\" something.\n\nbarrier1 = main reason they are not playing yet. Use \"none\" unless attitude is \"hesitant\" or \"critical\".\n- \"awareness\": did not know the game or studio, or confused about what it is\n- \"theme\": setting, genre, art style or subject is not for them\n- \"skill\": too hard or complex\n- \"device\": their own PC, console or platform cannot run it; performance worries about their hardware\n- \"price\": cost, waiting for a sale, value for money\n- \"time\": too long, no time, backlog\n- \"prior\": has not played earlier games in the series\n- \"emotion\": too scary or stressful\n- \"social\": no one to play with\n- \"product\": missing features, bugs, quality, early-access state, wishes about what the game should include\n- \"loyal\": already committed to a competing game\n- \"none\"\nbarrier2 = a clearly separate second barrier, else \"none\". Do not repeat the same idea in two barriers.\n\nlayer = who the commenter is, when the text reveals it:\n- \"fan\": played earlier games in THIS series or by THIS studio\n- \"competitor\": names another game or series, or uses its vocabulary, in a way that shows they know or play it (for example \"I spent hours in CAS\", \"this is what I wanted Sims 5 to be\", \"a British Stalker\")\n- \"newcomer\": says they do not normally play this kind of game\n- \"unknown\": not revealed (most common)\ncompetitor = name of that other game, else \"\".\n\nad = reaction to the sponsorship:\n- \"accept\": explicitly fine with it or praises it\n- \"dislike\": complains about the ad, or doubts the creator's honesty because it is paid\n- \"neutral\": mentions the sponsor or sponsorship without judging it\n- \"none\": not mentioned\n\ncontroversy = 1 if the comment refers to a scandal, accusation or serious controversy about the CREATOR as a person, else 0. Jokes about in-game behaviour are 0.\n\nevidence = up to 8 words copied from the comment that drove the labels. Use \"\" when attitude is \"offtopic\".\nconf = \"h\" or \"l\". Use \"l\" for sarcasm you are unsure about, mixed signals, or text you cannot read well.\n\nSarcasm: label the real meaning. Do not invent a layer or barrier the text does not support.\n";
 
-const BATCH = 25, MAX_COMMENTS = 300, CONCURRENCY = 6, CACHE_DAYS = 7, VERSION = 'v2';
+const BATCH = 25, MAX_COMMENTS = 300, CONCURRENCY = 6, CACHE_DAYS = 7, VERSION = 'v2', BUILD = 'v3';
 const RESERVE_USD = 0.3;   // 开始分析前先预扣这么多，结束后按实际花费结算
 const PRICE = m => /haiku/.test(m) ? [0.10, 0.50] : /opus/.test(m) ? [10, 50] : [2, 10];   // 每百万 token 的输入、输出价格（美元）
 const SETS = {
@@ -132,10 +132,20 @@ const json = (obj, status, headers) => new Response(JSON.stringify(obj), { statu
 async function userKey(req, env) {
   const ip = req.headers.get('CF-Connecting-IP') || req.headers.get('X-Forwarded-For') || 'unknown';
   const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ip + '|' + (env.SALT || 'creator-signal')));
-  return 'u:' + [...new Uint8Array(d)].slice(0, 12).map(b => b.toString(16).padStart(2, '0')).join('');
+  return 'su:' + [...new Uint8Array(d)].slice(0, 12).map(b => b.toString(16).padStart(2, '0')).join('') + ':';
 }
-const money = async (env, key) => parseFloat(await env.CACHE.get(key) || '0') || 0;
-const addMoney = async (env, key, delta, ttl) => { const v = Math.max(0, await money(env, key) + delta); await env.CACHE.put(key, v.toFixed(4), { expirationTtl: ttl }); return v; };
+// 记账方式：每次分析单独记一条（金额放在这条记录的附加信息里），总花费 = 把同一前缀下的记录加起来。
+// 这样两个请求同时进来也不会互相覆盖，账不会少记。
+async function money(env, prefix) {
+  let sum = 0, cursor;
+  do {
+    const r = await env.CACHE.list(cursor ? { prefix, cursor } : { prefix });
+    for (const k of r.keys) sum += (k.metadata && k.metadata.c) || 0;
+    cursor = r.list_complete ? null : r.cursor;
+  } while (cursor);
+  return sum;
+}
+const record = (env, key, cost, ttl) => env.CACHE.put(key, '', { expirationTtl: ttl, metadata: { c: Math.round(Math.max(0, cost) * 10000) / 10000 } });
 const round2 = x => Math.round(x * 100) / 100;
 function samePassword(a, b) {
   if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
@@ -147,10 +157,10 @@ export default {
     const cors = corsHeaders(env, req), url = new URL(req.url);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
     try {
-      if (url.pathname === '/api/health') return json({ ok: true, version: VERSION }, 200, cors);
+      if (url.pathname === '/api/health') return json({ ok: true, version: BUILD }, 200, cors);
       if (!env.YOUTUBE_API_KEY || !env.ANTHROPIC_API_KEY || !env.CACHE) throw new HttpError(500, 'not_configured', 'The server is missing a key or the KV binding');
       const userLimit = parseFloat(env.USER_BUDGET_USD || '5'), dayLimit = parseFloat(env.DAILY_BUDGET_USD || '10');
-      const uKey = await userKey(req, env), day = new Date().toISOString().slice(0, 10), dKey = 'day:' + day;
+      const uKey = await userKey(req, env), day = new Date().toISOString().slice(0, 10), dKey = 'sd:' + day + ':';
       if (url.pathname === '/api/quota') return json({ spent: round2(await money(env, uKey)), limit: userLimit }, 200, cors);
       if (url.pathname !== '/api/analyze' || req.method !== 'POST') throw new HttpError(404, 'not_found');
       if (env.ACCESS_PASSWORD) {
@@ -168,9 +178,11 @@ export default {
       const cached = input.refresh ? null : await env.CACHE.get(key);
       if (cached) return new Response(JSON.stringify({ type: 'done', cached: true, video: JSON.parse(cached), quota: { spent: round2(await money(env, uKey)), limit: userLimit } }) + '\n', { headers: { ...cors, 'content-type': 'application/x-ndjson; charset=utf-8' } });
 
-      if (await money(env, uKey) + RESERVE_USD > userLimit) throw new HttpError(429, 'user_limit', 'Your free credit is used up');
+      const before = await money(env, uKey);
+      if (before + RESERVE_USD > userLimit) throw new HttpError(429, 'user_limit', 'Your free credit is used up');
       if (await money(env, dKey) + RESERVE_USD > dayLimit) throw new HttpError(429, 'daily_limit', 'The site has reached its daily budget');
-      await addMoney(env, uKey, RESERVE_USD, 90 * 86400); await addMoney(env, dKey, RESERVE_USD, 172800);   // 先预扣，防止同时发很多请求绕过额度
+      const rid = crypto.randomUUID(), settle = c => Promise.all([record(env, uKey + rid, c, 90 * 86400), record(env, dKey + rid, c, 172800)]);
+      await settle(RESERVE_USD);   // 先预扣，结束后改成实际花费
 
       const { readable, writable } = new TransformStream(), w = writable.getWriter(), enc = new TextEncoder();
       const send = obj => w.write(enc.encode(JSON.stringify(obj) + '\n'));
@@ -185,10 +197,10 @@ export default {
           if (!labelled.length) throw new HttpError(502, 'model_failed', 'The model could not read the comments');
           const result = { ...video, model, analyzed: day, failed, comments: labelled };
           if (!failed) await env.CACHE.put(key, JSON.stringify(result), { expirationTtl: CACHE_DAYS * 86400 });
-          const spent = await addMoney(env, uKey, cost - RESERVE_USD, 90 * 86400); await addMoney(env, dKey, cost - RESERVE_USD, 172800); cost = null;
-          await send({ type: 'done', cached: false, video: result, quota: { spent: round2(spent), limit: userLimit, cost: round2(result.cost = c) } });
+          await settle(cost); cost = null;
+          await send({ type: 'done', cached: false, video: result, quota: { spent: round2(await money(env, uKey)), limit: userLimit, cost: round2(c) } });
         } catch (e) {
-          if (cost !== null) { await addMoney(env, uKey, cost - RESERVE_USD, 90 * 86400).catch(() => {}); await addMoney(env, dKey, cost - RESERVE_USD, 172800).catch(() => {}); }   // 失败也只按实际花掉的算
+          if (cost !== null) await settle(cost).catch(() => {});   // 失败也只按实际花掉的算
           await send({ type: 'error', code: e.code || 'server_error', message: e instanceof HttpError ? e.message : 'Something went wrong' });
         } finally { await w.close().catch(() => {}); }
       })());
