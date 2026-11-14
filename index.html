@@ -427,8 +427,8 @@ const CHM = {}; try { Object.assign(CHM, JSON.parse(sessionStorage.getItem('cs-c
 function vsCh(v) { const c = CHM[v.id]; return c && c.med && v.views ? v.views / c.med : NaN; }
 async function loadMedians() {
   if (!API || S.chmBusy) return; S.chmBusy = true;
-  for (const v of D.videos.slice()) {
-    if (CHM[v.id] !== undefined) continue;
+  for (;;) {
+    const v = D.videos.find(x => CHM[x.id] === undefined); if (!v) break;   // 每次重新找，后来加入的视频也会被处理
     try {
       const r = await fetch(API + '/api/channel', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({url: 'https://www.youtube.com/watch?v=' + v.id})}), ch = await r.json();
       if (r.ok && Array.isArray(ch.videos)) { const st = chStats(ch); CHM[v.id] = {med: st.med, n: st.L.length, inS: ch.videos.some(x => x.id === v.id)}; } else CHM[v.id] = null;
