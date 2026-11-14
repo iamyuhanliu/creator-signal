@@ -484,7 +484,7 @@ async function translateShown() {
   try {
     const r = await fetch(API + '/api/translate', {method:'POST', headers: PW ? {'content-type':'application/json', Authorization:'Bearer ' + PW} : {'content-type':'application/json'}, body: JSON.stringify({texts: todo.map(c => c.t)})});
     const j = await r.json(); if (!r.ok || !Array.isArray(j.translations) || j.translations.length !== todo.length) throw new Error('bad');
-    todo.forEach((c, i) => { c._zh = j.translations[i]; }); if (v.live) saveAdded();
+    todo.forEach((c, i) => { c._zh = String(j.translations[i]).replace(/^\s*\d+[.、:：]\s*/, ''); }); if (v.live) saveAdded();
   } catch (e) { S.trErr = true; }
   S.trBusy = false; renderDetail();
   fetch(API + '/api/quota').then(r => r.ok ? r.json() : null).then(q => { if (q && typeof q.limit === 'number') { S.quota = q; renderStatic(); } }).catch(() => {});
