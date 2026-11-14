@@ -684,7 +684,7 @@ async function ensureChannel(v) {
     const r = await fetch(API + '/api/channel', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({url: 'https://www.youtube.com/watch?v=' + v.id})}), ch = await r.json();
     CHFULL[v.id] = r.ok && Array.isArray(ch.videos) ? ch : null;
   } catch (e) { CHFULL[v.id] = null; }
-  if (S.vid === v.id && S.tab === 'creator') renderDetail();
+  renderCompare(); if (S.vid === v.id && !(document.activeElement && document.activeElement.id === 'q')) renderDetail();
 }
 async function channelCheck(u) {
   if (S.busy) return; if (!API) { S.msg = 'mLive'; return renderStatic(); }
