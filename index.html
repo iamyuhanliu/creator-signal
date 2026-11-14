@@ -12,7 +12,7 @@
 --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,"PingFang SC","Microsoft YaHei",Helvetica,Arial,sans-serif}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-#batch,#detail,#compare,#comments,#method{scroll-margin-top:76px}
+#batch,#detail,#compare,#comments,#method,#channel{scroll-margin-top:76px}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans)}
 #code{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;image-rendering:pixelated;image-rendering:crisp-edges;opacity:.4}
@@ -86,6 +86,10 @@ button.rr:hover{background:rgba(255,255,255,.1)}
 .mx tbody tr{cursor:default}.mx tbody tr:hover{background:none}
 .mx button{width:100%;min-width:44px;height:36px;border:0;border-radius:8px;font:600 14px var(--mono)}.mx button:hover{outline:2px solid rgba(255,255,255,.6)}
 .mx .z{display:block;height:36px;line-height:36px;border-radius:8px;background:rgba(255,255,255,.03);color:#55555c}
+.chv{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}.chv th{text-align:left;cursor:default}.chv td{text-align:left;padding:9px 7px}.chv th:nth-child(n+3),.chv td:nth-child(n+3){text-align:right}
+.chv tbody tr{cursor:default}.chv td.tt{max-width:330px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chart svg{width:100%;height:auto;display:block}.lgd{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--mute);margin-top:8px}.lgd i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.sub2{font-size:15px;font-weight:600;margin:22px 0 10px}
 .fit{margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
 .fit svg{width:100%;height:auto;display:block}.fit circle{cursor:pointer}
 .acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
@@ -177,6 +181,7 @@ footer a{color:var(--ink)}
     <div class="imp"><button class="ghost" id="imp" data-i="impBtn"></button><span data-i="impHint"></span><input type="file" id="file" accept=".xlsx,.xls,.csv,.tsv,.txt" hidden></div>
   </div>
   <div id="batch"></div>
+  <div id="channel"></div>
   <div class="card" id="compare">
     <div class="hrow"><h2 data-i="compareTitle"></h2><button class="ghost" id="csv1" data-i="exportTable"></button></div>
     <div class="scroll"><table><thead><tr id="heads"></tr></thead><tbody id="rows"></tbody></table></div>
@@ -199,7 +204,7 @@ en:{
   navCompare:'Compare', navDetail:'Video detail', navMethod:'Method and limits',
   h1:'What did the audience actually say about the game?',
   sub:'Views tell you how many people watched a sponsored video. The comments tell you whether they want to play, what is stopping them, and whether they came from a competing game. Every number here links back to the comments behind it.',
-  by:'Built by', analyse:'Analyse', ph:'Paste a YouTube video link', compareTitle:'Compare sponsored videos', methodTitle:'Method and limits',
+  by:'Built by', analyse:'Analyse', ph:'Paste a YouTube video link, or a channel link to check the channel', compareTitle:'Compare sponsored videos', methodTitle:'Method and limits',
   heads:['Creator','Views','Views / subs','Like rate','About the game','Want to play','Hesitant','Top barrier','Competitor players','Ad pushback','Fee (USD)','CPM'],
   headTips:['','Total views of the video','Views divided by channel subscribers. Above 1x means the video travelled beyond the subscriber base.','Likes divided by views','Share of analysed comments that talk about the game','Share of game comments that want to play or praise the game','Share of game comments that are interested but name a condition or worry','The reason for not playing that comes up most often','Share of commenters who reveal they play a competing game','Share of comments that dislike the sponsorship','Type what you paid or were quoted. Stays in this browser only.','Fee divided by views, times 1,000'],
   pwPh:'Access password', pwSave:'Continue', mPw:'Enter the access password to analyse a new video.',
@@ -219,6 +224,23 @@ en:{
   bHeads:['Row','Creator','Link','Status','Want to play'],
   bs:{ready:'Ready', have:'Already analysed', dup:'Duplicate of a link above', channel:'Channel link. A video link is needed', ytother:'Not a video link', platform:'Platform not supported yet', running:'Analysing…', done:'Done'},
   xHeads:['Video title','Channel','Views','Views / subs','Like rate','About the game','Want to play','Hesitant','Top barrier','Competitor players','Ad pushback','CPM (USD)','In one line','Status'],
+  chBtn:'Check this channel', chBusy:'Checking the channel…', chTitle:'Channel check', chClose:'Close',
+  e_channel_link:'That channel link is not supported. Use a link with @handle or /channel/, or paste any video from the channel.', e_channel_not_found:'That channel could not be found.',
+  chMeta:(c)=>`${c.handle ? c.handle + ' · ' : ''}${c.country ? c.country + ' · ' : ''}on YouTube since ${c.created.slice(0, 4)} · ${big(c.videoCount)} videos · checked ${c.checked}`,
+  chNoAi:'Computed from public YouTube data. No AI is used in this check.',
+  chK:['Subscribers','Median views','Views per subscriber','Median like rate','Median comment rate','Declared sponsored'],
+  chD:{base:n=>`last ${n} long videos`, sp:(a,n)=>`${a} of the last ${n}`, hidden:'hidden by the channel'},
+  chSig:'Signals', chNote:'These are mismatches worth a question, not proof. Old channels, format changes and one viral hit can all produce the same patterns. Public data cannot show who the subscribers are.',
+  cs:{reach:'Do subscribers actually watch?', reachV:(p,n)=>`A typical video is watched by ${p} of the subscriber count (median of ${n} videos).`, reachH:'The subscriber count is hidden, so this cannot be checked.',
+    steady:'Are views steady?', steadyV:(p,k)=>`${p} of videos land within a third to three times the median. The biggest is ${k} times the median.`,
+    spike:'Views that outrun the likes', spikeV:n=>n ? `${n} video${n === 1 ? ' has' : 's have'} at least three times the usual views but half the usual like rate or less.` : 'No video combines unusually high views with an unusually low like rate.',
+    like:'Like rate', likeV:p=>`The median video gets ${p} likes per view.`, com:'Comment rate', comV:p=>`The median video gets ${p} comments per view.`,
+    spo:'Sponsored videos against the rest', spoV:(v,l)=>`Sponsored videos get ${v} of the usual views and ${l} of the usual like rate.`, spoN:n=>`Only ${n} declared sponsored video${n === 1 ? '' : 's'} in this sample, too few to compare.`,
+    act:'Recent activity', actV:(d,n)=>`Last upload ${d} days ago, ${n} uploads in the past 90 days.`},
+  chChart:'Views on recent long videos', chChartNote:'Oldest on the left. Bar height uses a square root scale so that one hit does not flatten the rest. The dashed line is the median.',
+  chLg:['Regular video','Declared sponsored','High views, low like rate'],
+  chSp:'Declared sponsored videos', chOut:'Videos worth a closer look', chH:['Video','Date','Views','vs median','Like rate',''], chAn:'Analyse comments',
+  chAsk:'What to ask the creator for before signing', chAskL:['Audience geography for the last 90 days. Bought traffic usually comes from places the creator does not speak to.','Traffic sources for recent videos. A large share from external or direct sources on a video with weak engagement needs an explanation.','Audience retention on two recent videos. Purchased views tend to leave within seconds.','Unique viewers and returning viewers, which are more telling than the public subscriber count.'],
   qTitle:'Quotes worth using', qNote:'The most liked comment of each kind.',
   port:(n,views,med,cpm)=>`<span><b>${n}</b> videos</span><span><b>${views}</b> total views</span><span>median want to play <b>${med}</b></span>` + (cpm ? `<span>blended CPM <b>$${cpm}</b></span>` : ''),
   roadTitle:'On the roadmap', road:['TikTok, Twitch and Instagram through the reserved platform adapter, once the data source has had a legal review.','Creator vetting from the open web: recent news and forum threads about a creator, listed with their sources and no verdict.','One-click translation of comments.','A one page PDF report per creator.'],
@@ -282,7 +304,7 @@ zh:{
   navCompare:'对比', navDetail:'视频详情', navMethod:'方法与局限',
   h1:'观众到底怎么评价这款游戏？',
   sub:'播放量只说明有多少人看了赞助视频。评论区能告诉你他们想不想玩、被什么拦住、是不是从竞品过来的。页面上每个数字都能点开，看到背后的评论原文。',
-  by:'作者', analyse:'分析', ph:'粘贴一条 YouTube 视频链接', compareTitle:'赞助视频对比', methodTitle:'方法与局限',
+  by:'作者', analyse:'分析', ph:'粘贴 YouTube 视频链接分析评论，或粘贴频道链接做频道体检', compareTitle:'赞助视频对比', methodTitle:'方法与局限',
   heads:['创作者','播放','播放/粉丝','点赞率','游戏相关度','想玩','犹豫','首要门槛','竞品玩家','广告反感','报价 (USD)','CPM'],
   headTips:['','视频总播放量','播放量除以频道粉丝数。大于 1x 说明视频传到了粉丝之外。','点赞数除以播放量','已分析评论里聊到游戏的占比','游戏相关评论里，想玩或明确夸游戏的占比','游戏相关评论里，感兴趣但提出条件或顾虑的占比','被提到最多的不玩原因','透露自己在玩竞品的评论者占比','反感赞助的评论占比','填入你支付或收到的报价，只保存在这个浏览器里。','报价除以播放量，再乘以 1000'],
   pwPh:'访问密码', pwSave:'继续', mPw:'分析新视频需要先输入访问密码。',
@@ -302,6 +324,23 @@ zh:{
   bHeads:['行','创作者','链接','状态','想玩'],
   bs:{ready:'待分析', have:'已分析过', dup:'和上面的链接重复', channel:'这是频道链接，需要具体的视频链接', ytother:'不是视频链接', platform:'暂不支持这个平台', running:'分析中…', done:'完成'},
   xHeads:['视频标题','频道','播放','播放/粉丝','点赞率','游戏相关度','想玩','犹豫','首要门槛','竞品玩家','广告反感','CPM (USD)','一句话结论','状态'],
+  chBtn:'体检这个频道', chBusy:'正在体检频道…', chTitle:'频道体检', chClose:'关闭',
+  e_channel_link:'不支持这种频道链接。请用带 @名字 或 /channel/ 的链接，或者直接粘贴这个频道的任意一条视频。', e_channel_not_found:'找不到这个频道。',
+  chMeta:(c)=>`${c.handle ? c.handle + ' · ' : ''}${c.country ? c.country + ' · ' : ''}${c.created.slice(0, 4)} 年开通 · ${big(c.videoCount)} 条视频 · 体检于 ${c.checked}`,
+  chNoAi:'根据 YouTube 公开数据计算，这项检查没有使用 AI。',
+  chK:['粉丝数','播放中位数','播放/粉丝','点赞率中位数','评论率中位数','已声明赞助'],
+  chD:{base:n=>`最近 ${n} 条长视频`, sp:(a,n)=>`最近 ${n} 条中有 ${a} 条`, hidden:'频道隐藏了粉丝数'},
+  chSig:'信号', chNote:'这些是值得追问的不匹配，不是证据。老频道、内容转型、偶然爆了一条，都会产生同样的现象。公开数据看不到粉丝是谁。',
+  cs:{reach:'粉丝真的在看吗', reachV:(p,n)=>`一条普通视频的播放量相当于粉丝数的 ${p}（${n} 条视频的中位数）。`, reachH:'频道隐藏了粉丝数，这一项无法检查。',
+    steady:'播放量稳定吗', steadyV:(p,k)=>`${p} 的视频落在中位数的三分之一到三倍之间。最高的一条是中位数的 ${k} 倍。`,
+    spike:'播放高但点赞跟不上', spikeV:n=>n ? `有 ${n} 条视频的播放量至少是平时的三倍，点赞率却只有平时的一半或更低。` : '没有哪条视频同时出现播放异常高、点赞率异常低。',
+    like:'点赞率', likeV:p=>`中位数视频每次播放带来 ${p} 的点赞。`, com:'评论率', comV:p=>`中位数视频每次播放带来 ${p} 的评论。`,
+    spo:'赞助视频和平时比', spoV:(v,l)=>`赞助视频的播放量是平时的 ${v}，点赞率是平时的 ${l}。`, spoN:n=>`这批视频里只有 ${n} 条声明了赞助，太少，无法比较。`,
+    act:'近期活跃度', actV:(d,n)=>`最近一次上传在 ${d} 天前，过去 90 天上传了 ${n} 条。`},
+  chChart:'近期长视频的播放量', chChartNote:'最早的在左边。柱高用平方根刻度，避免一条爆款把其他视频压扁。虚线是中位数。',
+  chLg:['普通视频','已声明赞助','播放高、点赞率低'],
+  chSp:'已声明赞助的视频', chOut:'值得细看的视频', chH:['视频','日期','播放','相对中位数','点赞率',''], chAn:'分析评论',
+  chAsk:'签约前建议向创作者要的数据', chAskL:['近 90 天的观众地区分布。买来的流量通常来自创作者并不面向的地区。','近期视频的流量来源。互动很弱的视频如果外部或直接来源占比很高，需要对方解释。','两条近期视频的观众留存曲线。买来的播放往往几秒内就离开。','独立观众数和回访观众数，它们比公开的粉丝数更说明问题。'],
   qTitle:'值得引用的评论', qNote:'每一类里点赞最多的那条。',
   port:(n,views,med,cpm)=>`<span><b>${n}</b> 条视频</span><span>总播放 <b>${views}</b></span><span>想玩占比中位数 <b>${med}</b></span>` + (cpm ? `<span>综合 CPM <b>$${cpm}</b></span>` : ''),
   roadTitle:'后续计划', road:['通过预留的平台接口接入 TikTok、Twitch 和 Instagram，前提是数据来源通过法务确认。','全网创作者背调：列出关于创作者的近期新闻和论坛讨论，只给来源，不下结论。','评论一键翻译。','每位创作者导出一页 PDF 报告。'],
@@ -489,6 +528,71 @@ async function translateShown() {
   S.trBusy = false; renderDetail();
   fetch(API + '/api/quota').then(r => r.ok ? r.json() : null).then(q => { if (q && typeof q.limit === 'number') { S.quota = q; renderStatic(); } }).catch(() => {});
 }
+function chStats(ch) {
+  const now = Date.now(), all = ch.videos.map(v => ({...v, age: (now - Date.parse(v.published)) / 864e5, lr: v.likes != null && v.views ? v.likes / v.views : NaN, cr: v.comments != null && v.views ? v.comments / v.views : NaN}));
+  let L = all.filter(v => !v.live && v.dur > 180 && v.age >= 3 && v.views != null); if (L.length < 5) L = all.filter(v => v.age >= 3 && v.views != null);
+  L.sort((a, b) => Date.parse(a.published) - Date.parse(b.published));
+  const med = median(L.map(v => v.views)), medLike = median(L.map(v => v.lr)), medCom = median(L.map(v => v.cr)), sp = L.filter(v => v.paid), org = L.filter(v => !v.paid);
+  L.forEach(v => { v.x = med ? v.views / med : NaN; v.spike = med && v.views >= 3 * med && !isNaN(v.lr) && v.lr <= .5 * medLike; });
+  return {all, L, med, medLike, medCom, sp, org, spikes: L.filter(v => v.spike), within: L.length ? L.filter(v => v.views >= med / 3 && v.views <= med * 3).length / L.length : NaN,
+    top: med ? Math.max(...L.map(v => v.views)) / med : NaN, reach: ch.subs ? med / ch.subs : NaN, last: all.length ? Math.round(Math.min(...all.map(v => v.age))) : NaN, recent: all.filter(v => v.age <= 90).length,
+    spV: sp.length >= 2 && org.length >= 3 ? median(sp.map(v => v.views)) / median(org.map(v => v.views)) : NaN, spL: sp.length >= 2 && org.length >= 3 ? median(sp.map(v => v.lr)) / median(org.map(v => v.lr)) : NaN};
+}
+function chSignals(ch, st) {
+  const C = T.cs, rows = [];
+  rows.push(ch.subs == null ? {label: C.reach, value: C.reachH, lv: 'info'} : {label: C.reach, value: C.reachV(pct(st.reach, st.reach < .1 ? 1 : 0), st.L.length), lv: st.reach < .01 ? 'flag' : st.reach < .03 ? 'watch' : 'ok'});
+  rows.push({label: C.steady, value: C.steadyV(pct(st.within), st.top.toFixed(1)), lv: st.within < .5 ? 'watch' : 'ok'});
+  rows.push({label: C.spike, value: C.spikeV(st.spikes.length), lv: st.spikes.length >= 2 ? 'flag' : st.spikes.length ? 'watch' : 'ok'});
+  rows.push({label: C.like, value: C.likeV(pct(st.medLike, 2)), lv: isNaN(st.medLike) ? 'info' : st.medLike < .005 ? 'flag' : st.medLike < .01 ? 'watch' : 'ok'});
+  rows.push({label: C.com, value: C.comV(pct(st.medCom, 3)), lv: isNaN(st.medCom) ? 'info' : st.medCom < .0002 ? 'watch' : 'ok'});
+  rows.push(isNaN(st.spV) ? {label: C.spo, value: C.spoN(st.sp.length), lv: 'info'} : {label: C.spo, value: C.spoV(pct(st.spV), pct(st.spL)), lv: st.spL < .5 && st.spV >= .8 ? 'flag' : st.spV < .5 ? 'watch' : 'ok'});
+  rows.push({label: C.act, value: C.actV(st.last, st.recent), lv: st.last > 60 ? 'watch' : 'ok'});
+  return rows;
+}
+function chChart(st) {
+  const V = st.L.slice(-30); if (V.length < 3) return '';
+  const W = 780, H = 230, L = 52, R = 12, Tp = 12, Bt = 26, pw = W - L - R, ph = H - Tp - Bt, mx = Math.max(...V.map(v => v.views), 1), Y = x => Tp + ph - Math.sqrt(x / mx) * ph, bw = pw / V.length;
+  let g = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${T.chChart}">`;
+  [mx, mx / 4].forEach(t => { g += `<line x1="${L}" y1="${Y(t)}" x2="${L + pw}" y2="${Y(t)}" stroke="rgba(255,255,255,.07)"/><text x="${L - 8}" y="${Y(t) + 4}" fill="#aeaeb6" font-size="11" text-anchor="end">${big(Math.round(t))}</text>`; });
+  V.forEach((v, i) => { const y = Y(v.views), c = v.spike ? 'var(--critical)' : v.paid ? '#f5f5f7' : 'rgba(245,245,247,.3)';
+    g += `<rect x="${L + i * bw + bw * .14}" y="${y}" width="${bw * .72}" height="${Math.max(1, Tp + ph - y)}" rx="2" fill="${c}"><title>${esc(v.title)} · ${big(v.views)} · ${pct(v.lr, 2)}</title></rect>`; });
+  g += `<line x1="${L}" y1="${Y(st.med)}" x2="${L + pw}" y2="${Y(st.med)}" stroke="rgba(255,255,255,.55)" stroke-dasharray="4 5"/><text x="${L - 8}" y="${Y(st.med) + 4}" fill="#f5f5f7" font-size="11" text-anchor="end">${big(Math.round(st.med))}</text>` +
+    `<text x="${L}" y="${H - 6}" fill="#aeaeb6" font-size="11">${V[0].published.slice(0, 10)}</text><text x="${L + pw}" y="${H - 6}" fill="#aeaeb6" font-size="11" text-anchor="end">${V[V.length - 1].published.slice(0, 10)}</text></svg>`;
+  return `<div class="sub2">${T.chChart}</div><div class="chart">${g}</div><div class="lgd"><span><i style="background:rgba(245,245,247,.3)"></i>${T.chLg[0]}</span><span><i style="background:#f5f5f7"></i>${T.chLg[1]}</span><span><i style="background:var(--critical)"></i>${T.chLg[2]}</span></div><div class="note">${T.chChartNote}</div>`;
+}
+function chTable(title, rows) {
+  if (!rows.length) return '';
+  return `<div class="sub2">${title}</div><div class="scroll"><table class="chv"><thead><tr>${T.chH.map(h => '<th>' + h + '</th>').join('')}</tr></thead><tbody>` +
+    rows.slice(0, 8).map(v => `<tr><td class="tt"><a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">${esc(v.title)}</a></td><td>${v.published.slice(0, 10)}</td><td>${big(v.views)}</td><td>${isNaN(v.x) ? 'n/a' : v.x.toFixed(1) + 'x'}</td><td>${pct(v.lr, 2)}</td><td><button class="ghost" data-an="${v.id}">${T.chAn}</button></td></tr>`).join('') + `</tbody></table></div>`;
+}
+function renderChannel() {
+  const el = document.getElementById('channel'), ch = S.ch; if (!ch) { el.innerHTML = ''; return; }
+  const st = chStats(ch), n = st.L.length;
+  el.innerHTML = `<div class="card"><div class="hrow"><h2>${T.chTitle}</h2><button class="ghost" id="chclose">${T.chClose}</button></div>
+    <div class="vhead"><div><h3>${esc(ch.title)}</h3><div class="meta">${esc(T.chMeta(ch))}</div></div></div>
+    <div class="tiles">
+      <div class="tile"><div class="k">${T.chK[0]}</div><div class="v">${ch.subs == null ? 'n/a' : big(ch.subs)}</div><div class="d">${ch.subs == null ? T.chD.hidden : ''}</div></div>
+      <div class="tile"><div class="k">${T.chK[1]}</div><div class="v">${big(Math.round(st.med))}</div><div class="d">${T.chD.base(n)}</div></div>
+      <div class="tile"><div class="k">${T.chK[2]}</div><div class="v">${pct(st.reach, st.reach < .1 ? 1 : 0)}</div><div class="d">${T.chD.base(n)}</div></div>
+      <div class="tile"><div class="k">${T.chK[3]}</div><div class="v">${pct(st.medLike, 2)}</div><div class="d">${T.chD.base(n)}</div></div>
+      <div class="tile"><div class="k">${T.chK[4]}</div><div class="v">${pct(st.medCom, 3)}</div><div class="d">${T.chD.base(n)}</div></div>
+      <div class="tile"><div class="k">${T.chK[5]}</div><div class="v">${st.sp.length}</div><div class="d">${T.chD.sp(st.sp.length, n)}</div></div>
+    </div>
+    <div class="sub2">${T.chSig}</div><div class="rk">${chSignals(ch, st).map(x => `<div class="rr"><i class="lv ${x.lv}"></i><div><b>${x.label}</b><span>${x.value}</span></div></div>`).join('')}</div>
+    <div class="note">${T.chNote} ${T.chNoAi}</div>
+    ${chChart(st)}${chTable(T.chOut, st.spikes.concat(st.L.filter(v => !v.spike && v.x >= 5)).sort((a, b) => b.views - a.views))}${chTable(T.chSp, st.sp.slice().reverse())}
+    <div class="sub2">${T.chAsk}</div><ul class="nb">${T.chAskL.map(x => '<li>' + x + '</li>').join('')}</ul></div>`;
+}
+async function channelCheck(u) {
+  if (S.busy) return; if (!API) { S.msg = 'mLive'; return renderStatic(); }
+  const btn = document.getElementById('go'); S.busy = true; btn.disabled = true; S.msg = 'chBusy'; renderStatic();
+  try {
+    const r = await fetch(API + '/api/channel', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({url: u})}), j = await r.json().catch(() => ({}));
+    if (!r.ok || !Array.isArray(j.videos)) throw {code: j.error || 'server_error'};
+    S.ch = j; S.msg = ''; document.getElementById('url').value = ''; render(); document.getElementById('channel').scrollIntoView();
+  } catch (e) { const k = 'e_' + (e && e.code ? e.code : 'network'); S.msg = T[k] ? k : 'e_server_error'; renderStatic(); }
+  finally { S.busy = false; btn.disabled = false; }
+}
 function download(name, rows) {
   const csv = '\ufeff' + rows.map(r => r.map(x => '"' + String(x == null ? '' : x).replace(/"/g, '""') + '"').join(',')).join('\r\n');
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'})); a.download = name;
@@ -606,7 +710,7 @@ function renderDetail() {
       <div class="meta"><a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">${esc(v.title)}</a></div>
       <div class="meta">${T.meta(v, m)}</div>
     </div>
-    <div class="acts"><label class="toggle"><input type="checkbox" id="wt" ${S.weighted ? 'checked' : ''}> ${T.weight}</label><button class="ghost" id="share">${T.copyLink}</button></div></div>
+    <div class="acts"><label class="toggle"><input type="checkbox" id="wt" ${S.weighted ? 'checked' : ''}> ${T.weight}</label><button class="ghost" id="chk">${T.chBtn}</button><button class="ghost" id="share">${T.copyLink}</button></div></div>
     <div class="verdict"><span>${T.vLabel}</span>${esc(verdict(v, m))}</div>
     <div class="ai"><b>AI</b><span>${T.ai(esc(v.model || D.model || 'Claude'))}</span></div>
     <div class="tiles">
@@ -666,13 +770,16 @@ function renderDetail() {
   el.innerHTML = h;
 }
 function render(keepFocus) {
-  renderStatic(); renderCompare(); renderDetail(); renderBatch();
+  renderStatic(); renderCompare(); renderDetail(); renderBatch(); renderChannel();
   if (keepFocus) { const q = document.getElementById('q'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
 }
 function select(id, scroll) { S.vid = id; S.filter = null; S.q = ''; S.limit = 30; render(); if (scroll) document.getElementById('detail').scrollIntoView(); }
 
 document.addEventListener('click', e => {
   if (e.target.closest('input.fee')) return;
+  if (e.target.id === 'chk') return channelCheck('https://www.youtube.com/watch?v=' + S.vid);
+  if (e.target.id === 'chclose') { S.ch = null; return renderChannel(); }
+  const anb = e.target.closest('[data-an]'); if (anb) { document.getElementById('url').value = 'https://www.youtube.com/watch?v=' + anb.dataset.an; return analyse(); }
   if (e.target.id === 'tr') return translateShown();
   if (e.target.id === 'share') return copyText(shareUrl(), e.target);
   const cpb = e.target.closest('[data-cp]'); if (cpb) { const v = D.videos.find(x => x.id === S.vid); return copyText('"' + cpb.dataset.cp + '" (comment on ' + (v ? v.channel + ', ' : '') + 'youtu.be/' + S.vid + ')', cpb); }
@@ -708,6 +815,7 @@ document.addEventListener('input', e => { if (e.target.id === 'q') { S.q = e.tar
 function analyse() {
   const u = document.getElementById('url').value.trim(), many = findLinks(u);
   if (many.length > 1) { document.getElementById('url').value = ''; return loadSheet(lang === 'zh' ? '粘贴的链接' : 'pasted links', many.map(x => [x]), null); }
+  if (u && (/^@[\w.\-]+$/.test(u) || classify(u).kind === 'channel')) return channelCheck(u);
   const id = u && videoId(u);
   if (!u) S.msg = 'mEmpty'; else if (!id) S.msg = 'mBad';
   else if (D.videos.some(v => v.id === id)) { S.msg = ''; return select(id, true); }
