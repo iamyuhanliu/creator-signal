@@ -89,6 +89,7 @@ button.rr:hover{background:rgba(255,255,255,.1)}
 .lt.ok{background:rgba(46,204,138,.18);color:#7be8b8}.lt.ok::before{background:var(--want)}
 .lt.watch{background:rgba(240,170,60,.2);color:#f6c877}.lt.watch::before{background:var(--hesitant)}
 .lt.flag{background:rgba(240,90,90,.22);color:#ffa3a3}.lt.flag::before{background:var(--critical)}
+.mgo{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px;padding-top:16px;border-top:1px solid var(--line);font-size:14px;color:var(--mute)}.card{scroll-margin-top:76px}
 .bench{margin:4px 0 14px;padding:14px 16px;border-radius:14px;background:rgba(0,0,0,.28);border:1px solid var(--line)}
 .bench table{font-size:13.5px}.bench th,.bench td{text-align:left!important;cursor:default;vertical-align:top;padding:9px 8px;white-space:normal}.bench tbody tr{cursor:default}.bench tbody tr:hover{background:none}
 .bench td:first-child{font-weight:600;white-space:nowrap}.bench td:nth-child(n+3):nth-child(-n+5){min-width:104px}.bench td.how{color:#d6d1e6;min-width:200px}.bench td.src{color:#cfc9e2;min-width:230px}.bench p{font-size:13px;color:#cfc9e2;margin:10px 0 0}
@@ -225,7 +226,7 @@ footer a{color:var(--ink)}
     <div class="scroll"><table><thead><tr id="heads"></tr></thead><tbody id="rows"></tbody></table></div>
   </div>
   <div id="detail"></div>
-  <div class="card method" id="method"><h2 data-i="methodTitle"></h2><ul id="methodList"></ul></div>
+  <div class="card method" id="method"><h2 data-i="methodTitle"></h2><ul id="methodList"></ul><div class="mgo" id="methodGo"></div></div>
   <footer><span><span data-i="by"></span> Yuhan Liu · <a href="mailto:iamyuhanliu@gmail.com">iamyuhanliu@gmail.com</a></span><span id="foot"></span></footer>
 </div></main>
 
@@ -343,14 +344,10 @@ en:{
   b:{awareness:'Did not know the game',theme:'Theme or genre',skill:'Looks too hard',device:'Platform or hardware',price:'Price',time:'Time',prior:'Has not played earlier games',emotion:'Too scary or stressful',social:'No one to play with',product:'Features or quality',loyal:'Committed to a competitor'},
   l:{fan:'Existing fans',competitor:'Competitor players',newcomer:'Newcomers',unknown:'Not identifiable'},
   ad:{accept:'Accepts the sponsorship',neutral:'Mentions the sponsorship',dislike:'Dislikes the sponsorship'},
-  method:m=>['Data comes from the official YouTube Data API: public video statistics and up to 300 top level comments per video, in YouTube relevance order. Replies are not included, and commenter names are not stored.',
-    'Relevance order favours popular comments, so the sample leans toward what most viewers saw and agreed with, and differs from a random sample.',
-    `Each comment is read by a language model (${m}) and labelled for stance toward the game, the stated barrier, who the commenter is, and reaction to the sponsorship. There is no keyword list.`,
-    'Accuracy check: on a 100 comment test set, the model matched a reference answer on stance for 92 comments and on barrier for 99. The reference answer was adjudicated by a stronger model and has not yet been fully checked by a person.',
-    'Want to play and Hesitant are shares of comments about the game, not of all comments. Comments about the creator or jokes count as not about the game.',
+  method:m=>['Everything comes from the official YouTube Data API and uses public data only. Commenter names are not stored.',
+    `Each comment is read and labelled by a language model (${m}). There is no keyword list, and a single label can be wrong.`,
     'Commenters are a small and unusual part of the audience. These numbers suit comparing videos and finding reasons. They cannot forecast sales.',
-    'A video with fewer than 30 comments about the game is marked as a small sample.',
-    'Risk signals are simple checks: the model flags comments about a controversy involving the creator, and the page counts repeated and very short comments. They can be wrong in both directions, so check before acting.']
+    'Three known gaps. Most decision lines are my own starting points with no industry benchmark behind them. The bought-subscriber check is not tiered by channel size. The accuracy test used reference labels that a person has not fully reviewed.']
 },
 zh:{
   navCompare:'对比', navDetail:'视频详情', navMethod:'方法',
@@ -457,14 +454,10 @@ zh:{
   b:{awareness:'不知道这款游戏',theme:'题材或类型',skill:'看起来太难',device:'平台或硬件',price:'价格',time:'时间',prior:'没玩过前作',emotion:'太吓人或压力大',social:'没人一起玩',product:'功能或质量',loyal:'已选择竞品'},
   l:{fan:'老粉',competitor:'竞品玩家',newcomer:'新人',unknown:'看不出'},
   ad:{accept:'接受赞助',neutral:'提到赞助',dislike:'反感赞助'},
-  method:m=>['数据来自 YouTube 官方 Data API：公开的视频数据，以及每条视频最多 300 条一级评论，按 YouTube 的相关度排序。不含回复，也不保存评论者的名字。',
-    '相关度排序偏向热门评论，所以样本更接近多数观众看到并认同的内容，和随机抽样有差别。',
-    `每条评论由语言模型（${m}）阅读并打标签：对游戏的态度、说出的门槛、评论者身份、对赞助的反应。没有使用关键词词库。`,
-    '准确率检验：在 100 条测试评论上，模型的态度判断有 92 条与参考答案一致，门槛判断有 99 条一致。参考答案由更强的模型裁决，尚未经过人工完整复核。',
-    '想玩和犹豫的占比，分母是游戏相关的评论，不是全部评论。只聊创作者或玩梗的评论算作与游戏无关。',
+  method:m=>['数据全部来自 YouTube 官方 Data API，只用公开数据，不保存评论者的名字。',
+    `每条评论由语言模型（${m}）阅读并打标签，没有使用关键词词库，单条判断可能出错。`,
     '留言的人只是观众里很小且不典型的一部分。这些数字适合用来对比视频和寻找原因，无法预测销量。',
-    '游戏相关评论不足 30 条的视频会标记为样本偏少。',
-    '风险信号是简单的检查：模型标出提到创作者本人争议的评论，页面统计重复评论和极短评论。它们可能误报也可能漏报，采取行动前请先核实。']
+    '已知的三点不足：大部分判断线是我自己定的起点，没有行业基准；买粉检测没有按频道大小分档；准确率测试用的参考答案没有经过人工完整复核。']
 }};
 let lang = 'en';
 const HASH = new URLSearchParams(location.hash.slice(1));
@@ -682,6 +675,7 @@ const BENCH = {
    ['重复评论','同上','< 4%','4% 到 10%','≥ 10%','a','没有公开基准。'],
    ['极短评论','不超过 2 个词的评论占比','不计入判断','≥ 50%','不设','a','没有公开基准。短评论本身很常见，所以只在过半时提示。'],
    ['AI 把握低','AI 自己标为把握低的评论占比','不计入判断','≥ 15%','不设','a','没有公开基准。用来提醒这条视频的分析结果需要人工复核。']],
+  more:'每个数字怎么算、线划在哪、依据是什么，见这三张表：', go:{read:'评论指标的标准', fake:'买粉检测的标准', risk:'风险信号的标准'},
   readH:['指标','怎么算','判断线','依据'],
   read: [
    ['游戏相关度','聊到游戏的评论 ÷ 全部已分析评论','不到 25% 时，结论会写"多数评论在聊创作者"','a','没有行业基准。页面只拿它和当前这批视频的中位数比。'],
@@ -716,6 +710,7 @@ const BENCH = {
    ['Duplicate comments','As above','< 4%','4% to 10%','≥ 10%','a','No public benchmark.'],
    ['Very short comments','Share of comments with 2 words or fewer','not scored','≥ 50%','not used','a','No public benchmark. Short comments are common, so it only prompts above half.'],
    ['Low model confidence','Share of comments the model marked as low confidence','not scored','≥ 15%','not used','a','No public benchmark. It tells you this video needs a human check.']],
+  more:'How each number is calculated, where the lines sit and what they rest on:', go:{read:'Comment metrics', fake:'Bought-subscriber check', risk:'Risk signals'},
   readH:['Metric','How it is calculated','Decision line','Basis'],
   read: [
    ['About the game','Comments about the game ÷ all analysed comments','Under 25%, the verdict says most comments are about the creator','a','No industry benchmark. The page only compares it with the median of the current set.'],
@@ -855,6 +850,7 @@ function renderStatic() {
   document.getElementById('samples').innerHTML = D.videos.map(v => `<button class="chip" data-sample="${v.id}">${esc(v.channel)}</button>`).join('');
   document.getElementById('notice').innerHTML = !D.videos.length ? `<div class="notice">${T.nodata}</div>` : D.partial ? `<div class="notice">${T.partial}</div>` : '';
   document.getElementById('methodList').innerHTML = T.method(esc(D.model || 'Claude')).map(x => '<li>' + x + '</li>').join('');
+  document.getElementById('methodGo').innerHTML = `<span>${BENCH[lang].more}</span>` + ['read', 'fake', 'risk'].map(k => `<button class="ghost" data-goto="${k}">${BENCH[lang].go[k]}</button>`).join('');
   document.getElementById('foot').textContent = T.foot(D.videos.length, D.videos.reduce((s, v) => s + v.comments.length, 0), D.generated || '');
 }
 function renderCompare() {
@@ -977,6 +973,8 @@ document.addEventListener('click', e => {
   if (tb) { e.preventDefault(); S.tab = tb.dataset.tab; renderDetail(); if (tb.tagName === 'A') document.getElementById('detail').scrollIntoView(); else { const t = document.querySelector('.tabbar'); if (t && t.getBoundingClientRect().top <= 60) t.scrollIntoView(); } return; }
   if (e.target.id === 'chk') return channelCheck('https://www.youtube.com/watch?v=' + S.vid);
   if (e.target.id === 'chclose') { S.ch = null; return renderChannel(); }
+  const gb = e.target.closest('[data-goto]'); if (gb) { const k = gb.dataset.goto; S.bench = S.bench || {}; S.bench[k] = true; if (k === 'risk') S.tab = 'creator'; renderDetail();
+    const el = k === 'fake' ? document.getElementById('fake') : k === 'risk' ? document.querySelector('[data-bench="risk"]').closest('.card') : document.getElementById('detail'); if (el) el.scrollIntoView(); return; }
   const bb = e.target.closest('[data-bench]'); if (bb) { S.bench = S.bench || {}; S.bench[bb.dataset.bench] = !S.bench[bb.dataset.bench]; renderChannel(); return renderDetail(); }
   const anb = e.target.closest('[data-an]'); if (anb) { document.getElementById('url').value = 'https://www.youtube.com/watch?v=' + anb.dataset.an; return analyse(); }
   if (e.target.id === 'tr') return translateShown();
