@@ -89,6 +89,10 @@ button.rr:hover{background:rgba(255,255,255,.1)}
 .lt.ok{background:rgba(46,204,138,.18);color:#7be8b8}.lt.ok::before{background:var(--want)}
 .lt.watch{background:rgba(240,170,60,.2);color:#f6c877}.lt.watch::before{background:var(--hesitant)}
 .lt.flag{background:rgba(240,90,90,.22);color:#ffa3a3}.lt.flag::before{background:var(--critical)}
+.bench{margin:4px 0 14px;padding:14px 16px;border-radius:14px;background:rgba(0,0,0,.28);border:1px solid var(--line)}
+.bench table{font-size:13.5px}.bench th,.bench td{text-align:left!important;cursor:default;vertical-align:top;padding:9px 8px;white-space:normal}.bench tbody tr{cursor:default}.bench tbody tr:hover{background:none}
+.bench td:first-child{font-weight:600;white-space:nowrap}.bench td:nth-child(n+3):nth-child(-n+5){min-width:104px}.bench td.how{color:#d6d1e6;min-width:200px}.bench td.src{color:#cfc9e2;min-width:230px}.bench p{font-size:13px;color:#cfc9e2;margin:10px 0 0}
+.bz{display:inline-block;font:600 11px var(--sans);font-style:normal;padding:1px 7px;border-radius:999px;margin-right:6px;background:rgba(255,255,255,.12);color:#d9d9de}.bz.ref{background:rgba(185,166,255,.24);color:#ddd3ff}.bz.off{background:rgba(46,204,138,.18);color:#7be8b8}
 .lgd2{display:flex;gap:6px 14px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--mute);margin:0 0 12px}.lgd2 .lt{margin-left:0}
 .rr{grid-template-columns:1fr!important}
 .cmp{width:100%;border-collapse:collapse;font-size:15px}.cmp th{text-align:left;cursor:default}.cmp td{text-align:left;padding:13px 7px;vertical-align:middle}
@@ -657,12 +661,56 @@ function fakeCheck(v) {
 const fkHead = k => `<div class="fk ${k.lv}"><i></i><div><b>${T.fk[k.lv]}</b>${k.rows.length ? `<span>${T.fkSub(k.n, k.f, k.w)}</span>` : ''}</div></div>`;
 const lvTag = lv => `<em class="lt ${lv}">${T.lvN[lv] || ''}</em>`;
 const lvLegend = () => `<div class="lgd2"><span>${T.lvLg}</span>${['ok', 'watch', 'flag', 'info'].map(k => `<span>${lvTag(k)} ${T.lvLgT[k]}</span>`).join('')}</div>`;
+const SRC = {vs:'https://www.overseeros.com/blog/youtube-views-to-subscriber-ratio', cm:'https://www.overseeros.com/blog/good-comment-to-view-ratio-youtube', lk:'https://upgrowth.in/social-media-tools/youtube-engagement-rate-calculator/', yt:'https://support.google.com/youtube/answer/3399767', asa:'https://www.asa.org.uk/resource/influencers-guide.html'};
+const lnk = (k, t) => `<a href="${SRC[k]}" target="_blank" rel="noopener">${t}</a>`;
+const BENCH = {
+ zh: {btn:'查看判定标准', hide:'收起判定标准', H:['检查项','怎么算','正常','留意','异常','依据'], tag:{a:'自定假设', ref:'有参考数据', off:'官方规则'},
+  fake: [
+   ['粉丝真的在看吗','普通长视频的播放量中位数 ÷ 粉丝数','≥ 3%','1% 到 3%','< 1%','ref',`阈值是我定的。参考 ${lnk('vs','OverseerOS 对 273 个频道、2,043 条视频的统计')}：中位数在 1 万到 10 万粉频道是 36.2%，10 万到 100 万粉是 11.3%，100 万粉以上是 5.2%。我把线定在最大一档的中位数以下，宁可漏报。`],
+   ['播放量稳定吗','播放量落在频道中位数三分之一到三倍之间的视频占比','≥ 50%','< 50%','不设','a','没有找到公开基准。逻辑是正常频道的大部分视频应该在自己的常态附近。'],
+   ['播放高但点赞跟不上','播放量 ≥ 中位数 3 倍、同时点赞率 ≤ 频道中位数一半的视频条数','0 条','1 条','≥ 2 条','a','没有公开基准。逻辑是买来的播放量通常不会带来同比例的点赞。'],
+   ['点赞率','点赞 ÷ 播放，取频道中位数','≥ 1%','0.5% 到 1%','< 0.5%','ref',`阈值是我定的。${lnk('lk','upGrowth 的行业说法')}是全平台平均 1% 到 3%，所以低于 1% 才提示。`],
+   ['评论率','评论 ÷ 播放，取频道中位数','≥ 0.02%','< 0.02%','不设','ref',`阈值是我定的。参考 ${lnk('cm','OverseerOS 对 3,521 条长视频的统计')}：中位数 0.203%，最低的 10% 在 0.051% 以下，百万播放视频中位数 0.089%。`],
+   ['赞助视频和平时比','赞助视频与非赞助视频的中位数之比。至少要有 2 条赞助和 3 条非赞助视频，赞助标记来自 YouTube 的付费推广声明','其余情况','播放不到平时的 50%','点赞率不到平时的 50%，播放却 ≥ 平时的 80%','a','没有公开基准。'],
+   ['重复评论','去掉标点和大小写后完全相同、且不少于 15 个字符的评论，占已分析评论的比例','< 4%','4% 到 10%','≥ 10%','a','没有公开基准。'],
+   ['总结论','把上面 7 项的标签加起来','其余情况','1 项异常，或 2 项以上留意','2 项以上异常','a',`规则是我定的。${lnk('yt','YouTube 虚假互动政策')}只规定了什么行为违规，没有给出数字标准。`]],
+  risk: [
+   ['争议提及','AI 标为提到创作者争议的评论条数','0 条','1 到 2 条','≥ 3 条','a','没有公开基准。'],
+   ['广告反感','AI 标为反感这次赞助的评论','0 条','≥ 1 条','占已分析评论 ≥ 3%','a','没有公开基准。'],
+   ['赞助披露','视频有没有 YouTube 的付费推广声明','有声明','不设','标题或评论提到赞助，但没有声明','off',`${lnk('asa','英国 ASA、CAP 和 CMA 的网红广告指南')}要求广告必须清楚标明，品牌和创作者都有责任。都没提到赞助时只显示"仅供参考"。`],
+   ['重复评论','同上','< 4%','4% 到 10%','≥ 10%','a','没有公开基准。'],
+   ['极短评论','不超过 2 个词的评论占比','不计入判断','≥ 50%','不设','a','没有公开基准。短评论本身很常见，所以只在过半时提示。'],
+   ['AI 把握低','AI 自己标为把握低的评论占比','不计入判断','≥ 15%','不设','a','没有公开基准。用来提醒这条视频的分析结果需要人工复核。']],
+  note:'这些线大多是我按常识定的起点，没有经过大样本校准，也没有按频道大小分档。大频道的"播放 ÷ 粉丝"天然偏低，所以单项亮黄不代表有问题。'},
+ en: {btn:'How each label is decided', hide:'Hide the thresholds', H:['Check','How it is calculated','Normal','Check','Abnormal','Basis'], tag:{a:'My assumption', ref:'Reference data', off:'Official rule'},
+  fake: [
+   ['Are subscribers watching?','Median views of ordinary long videos ÷ subscribers','≥ 3%','1% to 3%','< 1%','ref',`The cut-offs are mine. Reference: ${lnk('vs','OverseerOS, 2,043 videos across 273 channels')}. Medians were 36.2% for 10K to 99K subscribers, 11.3% for 100K to 999K and 5.2% for 1M+. I set the line below the median of the largest tier, so it under-flags.`],
+   ['Are views steady?','Share of videos between one third and three times the channel median','≥ 50%','< 50%','not used','a','No public benchmark found. The logic: most videos on a healthy channel sit near its own normal.'],
+   ['High views, few likes','Videos with views ≥ 3x the median and a like rate ≤ half the channel median','0','1','≥ 2','a','No public benchmark. The logic: bought views rarely bring likes in proportion.'],
+   ['Like rate','Likes ÷ views, channel median','≥ 1%','0.5% to 1%','< 0.5%','ref',`The cut-offs are mine. ${lnk('lk','upGrowth')} puts the platform average at 1% to 3%, so the flag starts below 1%.`],
+   ['Comment rate','Comments ÷ views, channel median','≥ 0.02%','< 0.02%','not used','ref',`The cut-off is mine. Reference: ${lnk('cm','OverseerOS, 3,521 long videos')}. Median 0.203%, bottom tenth below 0.051%, million-view videos 0.089%.`],
+   ['Sponsored vs usual','Median of sponsored videos ÷ median of the rest. Needs 2 sponsored and 3 other videos. Sponsored means YouTube\'s paid promotion declaration','anything else','views under 50% of usual','like rate under 50% of usual while views are ≥ 80%','a','No public benchmark.'],
+   ['Duplicate comments','Comments of 15+ characters that are identical after removing case and punctuation, as a share of analysed comments','< 4%','4% to 10%','≥ 10%','a','No public benchmark.'],
+   ['Overall result','Counts the labels above','anything else','1 abnormal, or 2+ to check','2+ abnormal','a',`The rule is mine. ${lnk('yt','YouTube\'s fake engagement policy')} defines what is banned and gives no numeric standard.`]],
+  risk: [
+   ['Controversy mentions','Comments the model tagged as raising a controversy about the creator','0','1 to 2','≥ 3','a','No public benchmark.'],
+   ['Ad pushback','Comments the model tagged as disliking the sponsorship','0','≥ 1','≥ 3% of analysed comments','a','No public benchmark.'],
+   ['Disclosure','Whether the video carries YouTube\'s paid promotion declaration','declared','not used','title or comments mention a sponsor, no declaration','off',`${lnk('asa','The UK ASA, CAP and CMA influencer guide')} requires ads to be clearly labelled and holds brand and creator responsible. With no mention of a sponsor it shows "For reference".`],
+   ['Duplicate comments','As above','< 4%','4% to 10%','≥ 10%','a','No public benchmark.'],
+   ['Very short comments','Share of comments with 2 words or fewer','not scored','≥ 50%','not used','a','No public benchmark. Short comments are common, so it only prompts above half.'],
+   ['Low model confidence','Share of comments the model marked as low confidence','not scored','≥ 15%','not used','a','No public benchmark. It tells you this video needs a human check.']],
+  note:'Most of these lines are starting points I set by judgement. They are not calibrated on a large sample and not tiered by channel size. Views ÷ subscribers is naturally lower on large channels, so one amber label is no proof of a problem.'}
+};
+const benchBtn = k => `<button class="ghost" data-bench="${k}">${S.bench && S.bench[k] ? BENCH[lang].hide : BENCH[lang].btn}</button>`;
+const benchHTML = k => { if (!(S.bench && S.bench[k])) return ''; const B = BENCH[lang];
+  return `<div class="bench"><div class="scroll"><table><thead><tr>${B.H.map(h => '<th>' + h + '</th>').join('')}</tr></thead><tbody>` +
+    B[k].map(x => `<tr><td>${x[0]}</td><td class="how">${x[1]}</td><td>${x[2]}</td><td>${x[3]}</td><td>${x[4]}</td><td class="src"><em class="bz ${x[5]}">${B.tag[x[5]]}</em>${x[6]}</td></tr>`).join('') + `</tbody></table></div><p>${B.note}</p></div>`; };
 const fkRows = rows => lvLegend() + `<div class="rk">${rows.map(x => `<div class="rr"><div><b>${x.label}${lvTag(x.lv)}</b><span>${x.value}</span></div></div>`).join('')}</div>`;
 function channelHTML(ch, standalone) {
   const st = chStats(ch), n = st.L.length;
   const k = fkLevel(chSignals(ch, st).slice(0, 6));
-  return `<div class="card${standalone ? ' key' : ''}"><div class="hrow"><h2>${standalone ? T.fkTitle : T.chMore}</h2>${standalone ? `<button class="ghost" id="chclose">${T.chClose}</button>` : ''}</div>
-    <div class="vhead"><div><h3>${esc(ch.title)}</h3><div class="meta">${esc(T.chMeta(ch))}</div></div></div>${standalone ? '<div style="margin-top:16px">' + fkHead(k) + '</div>' : ''}
+  return `<div class="card${standalone ? ' key' : ''}"><div class="hrow"><h2>${standalone ? T.fkTitle : T.chMore}</h2>${standalone ? `<div class="acts">${benchBtn('fake')}<button class="ghost" id="chclose">${T.chClose}</button></div>` : ''}</div>
+    <div class="vhead"><div><h3>${esc(ch.title)}</h3><div class="meta">${esc(T.chMeta(ch))}</div></div></div>${standalone ? '<div style="margin-top:16px">' + fkHead(k) + benchHTML('fake') + '</div>' : ''}
     <div class="tiles">
       <div class="tile"><div class="k">${T.chK[0]}</div><div class="v">${ch.subs == null ? 'n/a' : big(ch.subs)}</div><div class="d">${ch.subs == null ? T.chD.hidden : ''}</div></div>
       <div class="tile"><div class="k">${T.chK[1]}</div><div class="v">${big(Math.round(st.med))}</div><div class="d">${T.chD.base(n)}</div></div>
@@ -850,7 +898,7 @@ function renderDetail() {
     `<div class="meta" style="margin-top:8px">${T.noClue(m.layers.find(x => x.key === 'unknown').n, m.n)}</div>` +
     (m.comps.length ? `<div class="chips">` + m.comps.slice(0, 8).map(([name, n]) => `<button class="chip" data-f="c:${esc(name)}">${esc(name)} · ${n}</button>`).join('') + `</div>` : '') + `</div>`;
   const fk = fakeCheck(v); if (CHFULL[v.id] === undefined) ensureChannel(v);
-  F += `<div class="card key"><h2>${T.fkTitle}</h2>${fkHead(fk)}${fk.rows.length ? fkRows(fk.rows) + `<div class="note">${T.chNote} ${T.chNoAi}</div>` : ''}</div>`;
+  F += `<div class="card key"><div class="hrow"><h2>${T.fkTitle}</h2>${fk.rows.length ? benchBtn('fake') : ''}</div>${fkHead(fk)}${fk.rows.length ? benchHTML('fake') + fkRows(fk.rows) + `<div class="note">${T.chNote} ${T.chNoAi}</div>` : ''}</div>`;
   const chF = CHFULL[v.id];
   if (chF && chF !== 'loading') {
     const B = baseline(chF), st = B.st, bs = B.base, r0 = v.views / bs.med, W = B.use ? T.wPeriod : T.wUsual, say = r => isNaN(r) || !isFinite(r) ? ['info', 'n/a', ''] : r < .7 ? ['watch', T.cmpLow(pct(r), W[1]), T.cmpTag.low(W[2])] : r > 1.3 ? ['ok', T.cmpHigh(r, W[1], pct(r)), T.cmpTag.high(W[2])] : ['info', T.cmpSame(pct(r), W[1]), T.cmpTag.same()];
@@ -862,7 +910,7 @@ function renderDetail() {
       `</tbody></table></div>` + (B.use ? `<div class="note">${T.cmpBaseP(bs.L.length, dates[0], dates[dates.length - 1])}</div><div class="note" style="margin-top:6px">${T.cmpNow(st.L.length)}</div>`
         : `<div class="note">${T.cmpBase(st.L.length)}</div>${chF.videos.some(x => x.id === v.id) ? '' : `<div class="note" style="margin-top:6px">${T.vchOld(v.published)}</div>`}`) + `</div>`;
   }
-  P.creator += `<div class="card"><h2>${T.rTitle}</h2>${lvLegend()}<div class="rk">` +
+  P.creator += `<div class="card"><div class="hrow"><h2>${T.rTitle}</h2>${benchBtn('risk')}</div>${benchHTML('risk')}${lvLegend()}<div class="rk">` +
     risk(v, m).map(x => { const inner = `<div><b>${x.label}${lvTag(x.lv)}</b><span>${x.value}</span></div>`; return x.f ? `<button class="rr" data-f="${x.f}">${inner}</button>` : `<div class="rr">${inner}</div>`; }).join('') +
     `</div><div class="note">${T.rNote} <a href="https://www.google.com/search?tbm=nws&q=${encodeURIComponent('"' + v.channel + '"')}" target="_blank" rel="noopener">${esc(T.rNews(v.channel))}</a></div></div>`;
   const full = CHFULL[v.id];
@@ -897,6 +945,7 @@ document.addEventListener('click', e => {
   if (tb) { e.preventDefault(); S.tab = tb.dataset.tab; renderDetail(); if (tb.tagName === 'A') document.getElementById('detail').scrollIntoView(); else { const t = document.querySelector('.tabbar'); if (t && t.getBoundingClientRect().top <= 60) t.scrollIntoView(); } return; }
   if (e.target.id === 'chk') return channelCheck('https://www.youtube.com/watch?v=' + S.vid);
   if (e.target.id === 'chclose') { S.ch = null; return renderChannel(); }
+  const bb = e.target.closest('[data-bench]'); if (bb) { S.bench = S.bench || {}; S.bench[bb.dataset.bench] = !S.bench[bb.dataset.bench]; renderChannel(); return renderDetail(); }
   const anb = e.target.closest('[data-an]'); if (anb) { document.getElementById('url').value = 'https://www.youtube.com/watch?v=' + anb.dataset.an; return analyse(); }
   if (e.target.id === 'tr') return translateShown();
   if (e.target.id === 'share') return copyText(shareUrl(), e.target);
