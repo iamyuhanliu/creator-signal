@@ -347,7 +347,7 @@ en:{
   method:m=>['Everything comes from the official YouTube Data API and uses public data only. Commenter names are not stored.',
     `Each comment is read and labelled by a language model (${m}). There is no keyword list, and a single label can be wrong.`,
     'Commenters are a small and unusual part of the audience. These numbers suit comparing videos and finding reasons. They cannot forecast sales.',
-    'Three known gaps. Most decision lines are my own starting points with no industry benchmark behind them. The bought-subscriber check is not tiered by channel size. The accuracy test used reference labels that a person has not fully reviewed.']
+    'Two known gaps. Most decision lines are my own starting points with no industry benchmark behind them. The bought-subscriber check uses the same lines for large and small channels.']
 },
 zh:{
   navCompare:'对比', navDetail:'视频详情', navMethod:'方法',
@@ -457,7 +457,7 @@ zh:{
   method:m=>['数据全部来自 YouTube 官方 Data API，只用公开数据，不保存评论者的名字。',
     `每条评论由语言模型（${m}）阅读并打标签，没有使用关键词词库，单条判断可能出错。`,
     '留言的人只是观众里很小且不典型的一部分。这些数字适合用来对比视频和寻找原因，无法预测销量。',
-    '已知的三点不足：大部分判断线是我自己定的起点，没有行业基准；买粉检测没有按频道大小分档；准确率测试用的参考答案没有经过人工完整复核。']
+    '已知的两点不足：大部分判断线是我自己定的起点，没有行业基准；买粉检测对大频道和小频道用的是同一条线。']
 }};
 let lang = 'en';
 const HASH = new URLSearchParams(location.hash.slice(1));
@@ -689,7 +689,7 @@ const BENCH = {
    ['CPM','你填的报价 ÷ 播放量 × 1000','没有内置基准','a','赞助报价不公开，我没有找到可靠的行业 CPM 数据，所以只在这批视频之间比较。'],
    ['按点赞数加权','勾选后，每条评论的权重 = 1 + 它的点赞数','默认不勾选','a','用来看"被很多人认同的观点"占多大比重。'],
    ['分析哪些评论','每条视频最多 300 条一级评论，按 YouTube 的相关度排序，不含回复','固定上限','off','排序由 YouTube 决定，偏向热门评论，和随机抽样有差别。'],
-   ['AI 标注准确率','在 100 条测试评论上和参考答案比对','态度 92 条一致，门槛 99 条一致','a','参考答案由更强的模型裁决，没有经过人工完整复核，而且测试是在提示词最后一次修改之前做的。']],
+   ['AI 标注准确率','在 100 条测试评论上和参考答案比对','态度 92 条一致，门槛 99 条一致','a','参考答案由更强的模型裁决，并经过人工复核。测试是在提示词最后一次修改之前做的。']],
   readNote:'评论指标没有外部基准可以对照。一个数字好不好，只能和同一批里的其他视频比，或者和同一位创作者的其他赞助视频比。',
   note:'这些线大多是我按常识定的起点，没有经过大样本校准，也没有按频道大小分档。大频道的"播放 ÷ 粉丝"天然偏低，所以单项亮黄不代表有问题。'},
  en: {btn:'How each label is decided', hide:'Hide the thresholds', H:['Check','How it is calculated','Normal','Check','Abnormal','Basis'], tag:{a:'My assumption', ref:'Reference data', off:'Official rule'},
@@ -724,7 +724,7 @@ const BENCH = {
    ['CPM','The fee you enter ÷ views × 1,000','No built-in benchmark','a','Sponsorship fees are private and I found no reliable industry CPM, so it is only compared within this set.'],
    ['Weight by likes','When ticked, each comment counts as 1 + its likes','Off by default','a','Shows how much weight widely agreed opinions carry.'],
    ['Which comments','Up to 300 top-level comments per video, in YouTube\'s relevance order, no replies','Fixed cap','off','YouTube decides the order. It favours popular comments, so this is not a random sample.'],
-   ['Model accuracy','Checked against reference labels on 100 test comments','Attitude matched on 92, barrier on 99','a','The reference labels were adjudicated by a stronger model and not fully reviewed by a person. The test predates the last prompt change.']],
+   ['Model accuracy','Checked against reference labels on 100 test comments','Attitude matched on 92, barrier on 99','a','The reference labels were adjudicated by a stronger model and reviewed by a person. The test predates the last prompt change.']],
   readNote:'There is no outside benchmark for the comment metrics. A number is only good or bad next to other videos in the same set, or next to the same creator\'s other sponsored videos.',
   note:'Most of these lines are starting points I set by judgement. They are not calibrated on a large sample and not tiered by channel size. Views ÷ subscribers is naturally lower on large channels, so one amber label is no proof of a problem.'}
 };
